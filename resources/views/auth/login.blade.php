@@ -13,23 +13,33 @@
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-4">
+<body class="flex flex-col items-center justify-center min-h-screen px-4">
 
-    <!-- Logo -->
+    <!-- Logo dan Judul -->
     <div class="text-center mb-6">
-        <div class="inline-block bg-blue-500 text-white p-4 rounded-2xl shadow-lg">
-            <span class="text-5xl font-bold">R</span>
+        <div class="bg-white p-4 inline-block rounded-full shadow-lg mb-4">
+             <img src="{{ asset('foto/Logo.png') }}" alt="Logo RFG" class="w-20 h-20">
         </div>
-        <h1 class="text-3xl font-bold text-gray-800 mt-4">Reuse For Good</h1>
+        <h1 class="text-3xl font-bold text-gray-800">Reuse For Good</h1>
         <p class="text-gray-600">Berbagi untuk Kebaikan</p>
     </div>
 
-    <!-- Kotak Form -->
+    <!-- Kotak Form Login -->
     <div class="bg-white w-full max-w-md p-8 md:p-10 rounded-2xl shadow-xl">
         <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Masuk</h2>
         <p class="text-center text-gray-500 mb-8">Masuk ke akun Anda</p>
 
-        <!-- Tampilkan error jika ada -->
+        <!-- === TAMBAHAN DI SINI === -->
+        <!-- Pesan Sukses setelah Registrasi -->
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4" role="alert">
+                <span class="block sm:inline">{{ session('success') }}</span>
+            </div>
+        @endif
+        <!-- === AKHIR TAMBAHAN === -->
+
+
+        <!-- Tampilkan error jika login gagal -->
         @if ($errors->any())
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4" role="alert">
                 <ul>
@@ -48,15 +58,19 @@
                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                        placeholder="Masukkan email Anda" required>
             </div>
+
+            <div class="mb-5">
+                <label for="password" class="block mb-2 text-sm font-medium text-gray-700">Password</Mabel>
+                <input type="password" id="password" name="password"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="Masukkan password Anda" required>
+            </div>
             
-            <div class="mb-8">
-                <label for="password" class="block mb-2 text-sm font-medium text-gray-700">Password</label>
-                <div class="relative">
-                    <input type="password" id="password" name="password"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                           placeholder="Masukkan password Anda" required>
-                    <!-- Ikon mata bisa ditambahkan di sini dengan JS -->
-                </div>
+            <!-- Lupa password (opsional) -->
+            <div class="text-right mb-6">
+                <a href="#" class="text-sm font-medium text-blue-500 hover:text-blue-600">
+                    Lupa password?
+                </a>
             </div>
 
             <button type="submit" 

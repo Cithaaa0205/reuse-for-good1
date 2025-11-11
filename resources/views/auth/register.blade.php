@@ -9,7 +9,8 @@
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            background: linear-gradient(120deg, #E0F7FA 0%, #B2EBF2 100%);
+            /* Background vignette biru yang halus */
+            background: radial-gradient(circle at center, #EBF8FF 0%, #D6E6F2 100%);
         }
     </style>
 </head>

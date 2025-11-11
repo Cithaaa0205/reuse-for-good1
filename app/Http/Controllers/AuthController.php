@@ -6,11 +6,11 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Routing\Controller; // <-- PERUBAHAN DI SINI
+use Illuminate\Routing\Controller; // Pastikan ini ada
 
 class AuthController extends Controller
 {
-    // Tampilkan form login (Gambar 3)
+    // Tampilkan form login
     public function showLoginForm()
     {
         return view('auth.login');
@@ -26,7 +26,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            // Arahkan ke beranda (Gambar 6)
+            // Arahkan ke beranda
             return redirect()->intended('home');
         }
 
@@ -35,7 +35,7 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // Tampilkan form registrasi (Gambar 4)
+    // Tampilkan form registrasi
     public function showRegistrationForm()
     {
         return view('auth.register');
@@ -61,9 +61,13 @@ class AuthController extends Controller
             'role' => 'donatur' // Default role
         ]);
 
-        Auth::login($user);
+        // === PERUBAHAN DI SINI ===
+        // 1. Hapus login otomatis
+        // Auth::login($user); 
 
-        return redirect()->route('home');
+        // 2. Arahkan kembali ke halaman login dengan pesan sukses
+        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan masuk dengan akun baru Anda.');
+        // === AKHIR PERUBAHAN ===
     }
 
     // Proses logout
@@ -72,6 +76,8 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login'); // <-- UBAH DARI redirect('/')
+        
+        // Arahkan ke halaman login setelah logout
+        return redirect()->route('login');
     }
 }

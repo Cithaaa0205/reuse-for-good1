@@ -26,11 +26,11 @@
             <span class="font-medium text-blue-500">Mulai &rarr;</span>
         </a>
         <!-- Terima Barang -->
-        <a href="{{ route('barang.index') }}" class="bg-green-600 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow text-center text-white">
-            <i data-lucide="package-check" class="w-16 h-16 text-white mx-auto mb-4"></i>
+        <a href="{{ route('barang.index') }}" class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow text-center">
+            <i data-lucide="package-check" class="w-16 h-16 text-green-500 mx-auto mb-4"></i>
             <h2 class="text-xl font-bold mb-2">TERIMA BARANG</h2>
-            <p class="mb-4">Menerima bantuan barang sesuai kebutuhan secara gratis</p>
-            <span class="font-medium">Mulai &rarr;</span>
+            <p class="text-gray-600 mb-4">Menerima bantuan barang sesuai kebutuhan secara gratis</p>
+            <span class="font-medium text-green-500">Mulai &rarr;</span>
         </a>
         <!-- Chat Room -->
         <a href="#" class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow text-center">
