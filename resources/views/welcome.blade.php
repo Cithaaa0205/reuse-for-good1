@@ -32,7 +32,7 @@
             <div class="text-center">
                 <!-- Ganti dengan tag <img> jika Anda punya file logo -->
                 <div class="text-blue-500 text-4xl font-bold mb-2">R.F.G</div>
-                <img src="https://placehold.co/150x100/EBF8FF/3B82F6?text=LOGO" alt="Logo RFG" class="mx-auto mb-4 w-32">
+                <img src="C:\Users\ACER\reuse-for-good1\resources\views\Logobaru[1].png=LOGO" alt="Logo RFG" class="mx-auto mb-4 w-32">
                 <div class="text-2xl font-semibold text-gray-800">Reuse For Good</div>
             </div>
         </div>
