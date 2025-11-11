@@ -70,9 +70,24 @@
         <h3 class="text-2xl font-bold mb-4">Barang Terbaru di Sekitar Anda</h3>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             @forelse($barangTerbaru as $item)
-                <div class="bg-white rounded-xl shadow overflow-hidden">
+                <div class="bg-white rounded-xl shadow overflow-hidden relative">
+                    <!-- === TOMBOL FAVORIT === -->
+                    @auth
+                        @php $isFavorited = in_array($item->id, $favoriteIds); @endphp
+                        <form action="{{ $isFavorited ? route('favorite.destroy', $item->id) : route('favorite.store', $item->id) }}" method="POST" class="absolute top-2 right-2 z-10">
+                            @csrf
+                            @if($isFavorited)
+                                @method('DELETE')
+                            @endif
+                            <button type="submit" class="favorite-btn p-1.5 rounded-full bg-black/30 text-white hover:bg-black/50 transition {{ $isFavorited ? 'favorited' : '' }}">
+                                <i data-lucide="heart" class="w-5 h-5 icon-outline"></i>
+                                <i data-lucide="heart" class="w-5 h-5 icon-filled fill-current text-red-500"></i>
+                            </button>
+                        </form>
+                    @endauth
+                    <!-- === AKHIR TOMBOL FAVORIT === -->
+                    
                     <a href="{{ route('barang.show', $item->id) }}">
-                        <!-- === PERBAIKAN PATH GAMBAR === -->
                         <img src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}" alt="{{ $item->nama_barang }}" class="w-full h-32 md:h-40 object-cover hover:opacity-90 transition-opacity">
                         <div class="p-3">
                             <h4 class="font-semibold truncate text-sm md:text-base">{{ $item->nama_barang }}</h4>

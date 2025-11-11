@@ -82,6 +82,19 @@
                     @endif
                     
                 </form>
+
+                <!-- === TOMBOL HAPUS (HANYA UNTUK PEMILIK) === -->
+                @if(Auth::id() == $barang->donatur_id)
+                <form action="{{ route('barang.destroy', $barang->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus donasi ini?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 mt-3">
+                        Hapus Donasi Ini
+                    </button>
+                </form>
+                @endif
+                <!-- === AKHIR TOMBOL HAPUS === -->
+                
                 <button class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg transition duration-300 mt-3">
                     Hubungi Pendonasi
                 </button>

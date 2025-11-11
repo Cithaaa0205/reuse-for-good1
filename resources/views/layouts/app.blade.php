@@ -44,6 +44,13 @@
             color: #D1D5DB; /* text-gray-300 */
             cursor: not-allowed;
         }
+
+        /* === TAMBAHAN CSS FAVORIT === */
+        .favorite-btn .icon-outline { display: block; }
+        .favorite-btn .icon-filled { display: none; }
+        .favorite-btn.favorited .icon-outline { display: none; }
+        .favorite-btn.favorited .icon-filled { display: block; }
+        /* === AKHIR TAMBAHAN === */
     </style>
 </head>
 <body class="min-h-screen">
