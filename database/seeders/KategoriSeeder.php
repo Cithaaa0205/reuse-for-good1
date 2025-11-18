@@ -24,14 +24,17 @@ class KategoriSeeder extends Seeder
             'Alat Tulis'
         ];
 
-        // Kosongkan tabel dulu jika perlu
+        // Opsional: Hapus data lama agar tidak duplikat saat seeding ulang
         // Kategori::truncate(); 
 
         foreach ($kategoris as $nama) {
-            Kategori::create([
-                'nama_kategori' => $nama,
-                'slug' => Str::slug($nama)
-            ]);
+            // Gunakan firstOrCreate agar tidak error duplikat jika dijalankan 2x
+            Kategori::firstOrCreate(
+                ['slug' => Str::slug($nama)], // Cek berdasarkan slug
+                ['nama_kategori' => $nama]    // Data yang dibuat jika belum ada
+            );
         }
+        
+        // BAGIAN $this->call() DIHAPUS DARI SINI!
     }
 }
