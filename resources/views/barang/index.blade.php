@@ -44,16 +44,16 @@
                         @php $isFavorited = in_array($item->id, $favoriteIds); @endphp
                         
                         <!-- Form ini akan mengirim ke rute yang berbeda tergantung $isFavorited -->
-                        <form action="{{ $isFavorited ? route('favorite.destroy', $item->id) : route('favorite.store', $item->id) }}" method="POST" class="absolute top-2 right-2 z-10">
-                            @csrf
-                            @if($isFavorited)
-                                @method('DELETE')
-                            @endif
-                            <button type="submit" class="favorite-btn p-1.5 rounded-full bg-black/30 text-white hover:bg-black/50 transition {{ $isFavorited ? 'favorited' : '' }}">
-                                <i data-lucide="heart" class="w-5 h-5 icon-outline"></i>
-                                <i data-lucide="heart" class="w-5 h-5 icon-filled fill-current {{ $isFavorited ? 'text-red-500' : '' }}"></i>
-                            </button>
-                        </form>
+<form action="{{ route('favorite.toggle', $item->id) }}" method="POST" class="absolute top-2 right-2 z-10">
+    @csrf
+    <button type="submit"
+        class="favorite-btn p-1.5 rounded-full bg-black/30 text-white hover:bg-black/50 transition {{ $isFavorited ? 'favorited' : '' }}">
+        
+        <i data-lucide="heart" class="w-5 h-5 icon-outline"></i>
+        <i data-lucide="heart" class="w-5 h-5 icon-filled fill-current {{ $isFavorited ? 'text-red-500' : '' }}"></i>
+    </button>
+</form>
+
                     @endauth
                     <!-- === AKHIR TOMBOL FAVORIT === -->
                     
