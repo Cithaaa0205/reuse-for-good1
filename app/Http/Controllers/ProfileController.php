@@ -19,33 +19,37 @@ class ProfileController extends Controller
     /**
      * Tampilkan halaman profil user.
      */
-    public function show(string $username)
-    {
-        $user = User::where('username', $username)->firstOrFail();
-        
-        // Ambil barang donasi (ini publik)
-        $barangDonasi = $user->barangDonasis()->latest()->get();
-        
-        // === TAMBAHAN BARU ===
-        $barangDiterima = collect(); // Default koleksi kosong
-        $favorites = collect();      // Default koleksi kosong
+    // app/Http/Controllers/ProfileController.php
 
-        // Cek apakah user yang login sedang melihat profilnya sendiri
-        if (Auth::check() && Auth::id() === $user->id) {
-            // Ambil barang yang diterima (privat)
-            $barangDiterima = $user->barangDiterima()->latest()->get();
-            // Ambil barang yang difavoritkan (privat)
-            $favorites = $user->favorites()->latest()->get();
-        }
-        // === AKHIR TAMBAHAN ===
-        
-        return view('profile.show', [
-            'user' => $user,
-            'barangDonasi' => $barangDonasi,
-            'barangDiterima' => $barangDiterima, // Kirim ke view
-            'favorites' => $favorites           // Kirim ke view
-        ]);
+public function show(string $username)
+{
+    $user = User::where('username', $username)->firstOrFail();
+
+    // Barang yang dia donasikan (publik)
+    $barangDonasi = $user->barangDonasis()->latest()->get();
+
+    // Default kosong
+    $barangDiterima = collect();
+    $favorites      = collect();
+
+    // Hanya kalau lagi lihat profil sendiri
+    if (Auth::check() && Auth::id() === $user->id) {
+        $barangDiterima = $user->barangDiterima()->latest()->get();
+
+        // Ambil barang yang difavoritkan
+        $favorites = $user->favorites()
+            ->latest('favorites.created_at') // urut dari yang paling baru difavoritkan
+            ->get();
     }
+
+    return view('profile.show', [
+        'user'           => $user,
+        'barangDonasi'   => $barangDonasi,
+        'barangDiterima' => $barangDiterima,
+        'favorites'      => $favorites,
+    ]);
+}
+
 
     /**
      * Tampilkan form edit profil.

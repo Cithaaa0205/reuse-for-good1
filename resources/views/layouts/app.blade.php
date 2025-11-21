@@ -88,7 +88,7 @@
                 <a href="{{ route('barang.create') }}" class="hidden md:block text-gray-600 font-medium hover:text-blue-600">Donasi</a>
                 <a href="{{ route('barang.index') }}" class="hidden md:block text-gray-600 font-medium hover:text-blue-600">Terima</a>
                 
-                <a href="#" class="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100">
+                <a href="{{ route('chat.index') }}" class="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100">
                     <i data-lucide="message-circle" class="w-6 h-6"></i>
                 </a>
 
@@ -101,14 +101,27 @@
                     </button>
                     <!-- Menu Dropdown (Perbaikan CSS Celah) -->
                     <div class="absolute right-0 w-48 bg-white rounded-lg shadow-xl overflow-hidden hidden group-hover:block">
-                        <a href="{{ route('profile.show', Auth::user()->username) }}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Profil Saya</a>
-                        <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Kelola Pengajuan</a>
-                        <div class="border-t border-gray-100"></div>
-                        <form action="{{ route('logout') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="w-full text-left block px-4 py-3 text-sm text-red-600 hover:bg-gray-100">Keluar</button>
-                        </form>
-                    </div>
+    <a href="{{ route('profile.show', Auth::user()->username) }}" 
+       class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
+        Profil Saya
+    </a>
+
+    <a href="{{ route('request.dashboard') }}" 
+       class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">
+        Kelola Pengajuan
+    </a>
+
+    <div class="border-t border-gray-100"></div>
+
+    <form action="{{ route('logout') }}" method="POST">
+        @csrf
+        <button type="submit" 
+                class="w-full text-left block px-4 py-3 text-sm text-red-600 hover:bg-gray-100">
+            Keluar
+        </button>
+    </form>
+</div>
+
                 </div>
                 @endauth
             </div>
