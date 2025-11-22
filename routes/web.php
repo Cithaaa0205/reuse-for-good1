@@ -66,6 +66,12 @@ Route::middleware('auth')->group(function () {
     // === AKHIR RUTE CHAT ===
 
     // Rute untuk Request Barang
-    // Gunakan {barangDonasi} (Route Model Binding)
+    // 1. Rute untuk mengajukan permintaan (Penerima)
     Route::post('request/{barangDonasi}', [RequestBarangController::class, 'store'])->name('request.store');
+
+    // 2. Rute untuk melihat daftar pengajuan masuk (Pendonasi) - BARU
+    Route::get('kelola-pengajuan', [RequestBarangController::class, 'index'])->name('request.manage');
+
+    // 3. Rute untuk menerima/menolak pengajuan (Pendonasi) - BARU
+    Route::patch('request/{requestBarang}/{status}', [RequestBarangController::class, 'updateStatus'])->name('request.updateStatus');
 });

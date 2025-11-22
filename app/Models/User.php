@@ -2,22 +2,14 @@
 
 namespace App\Models;
 
-// Kita HAPUS 'use Laravel\Sanctum\HasApiTokens;' dari sini
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    // Kita HAPUS 'HasApiTokens' dari sini
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'nama_lengkap',
         'email',
@@ -25,72 +17,52 @@ class User extends Authenticatable
         'username',
         'password',
         'role',
-        'foto_profil', // <-- Tambahan dari Edit Profil
-        'deskripsi',   // <-- Tambahan dari Edit Profil
+        'foto_profil',
+        'deskripsi',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    // Relasi: User (Donatur) bisa memiliki banyak barang donasi
+    // 1. Barang yang didonasikan OLEH user ini
     public function barangDonasis()
     {
         return $this->hasMany(BarangDonasi::class, 'donatur_id');
     }
 
-    // Relasi: User (Penerima) bisa memiliki banyak permintaan barang
+    // 2. Request yang dibuat OLEH user ini
     public function requestBarangs()
     {
         return $this->hasMany(RequestBarang::class, 'penerima_id');
     }
 
-    // === RELASI BARU UNTUK FITUR PROFIL & FAVORIT ===
+    // === PERBAIKAN UTAMA DI SINI ===
 
-    /**
-     * Relasi untuk mengambil barang-barang yang TELAH DITERIMA oleh user.
-     * (Asumsi status 'Selesai' di tabel request_barangs)
-     */
+    // 3. Barang yang berhasil DITERIMA oleh user ini
+    // (Mengambil barang dari tabel request_barangs dimana status = 'Disetujui')
     public function barangDiterima()
     {
-        return $this->hasManyThrough(
-            BarangDonasi::class,    // Model tujuan
-            RequestBarang::class,   // Model perantara
-            'penerima_id',          // Foreign key di 'request_barangs'
-            'id',                   // Foreign key di 'barang_donasis'
-            'id',                   // Local key di 'users'
-            'barang_donasi_id'      // Local key di 'request_barangs'
-        )->where('request_barangs.status', 'Selesai'); // Ganti 'Selesai' jika statusnya beda
+        return $this->belongsToMany(BarangDonasi::class, 'request_barangs', 'penerima_id', 'barang_donasi_id')
+                    ->wherePivot('status', 'Disetujui') // Hanya yang statusnya disetujui
+                    ->withTimestamps();
     }
 
-    /**
-     * Relasi untuk mengambil barang-barang yang difavoritkan user.
-     * (Relasi Many-to-Many)
-     */
+    // 4. Barang yang DIFAVORITKAN oleh user ini
+    // (Mengambil barang dari tabel favorites)
     public function favorites()
     {
-        return $this->belongsToMany(BarangDonasi::class, 'favorites', 'user_id', 'barang_donasi_id');
+        return $this->belongsToMany(BarangDonasi::class, 'favorites', 'user_id', 'barang_donasi_id')
+                    ->withTimestamps();
     }
 
-    // === RELASI BARU UNTUK FITUR CHAT ===
-
-    /**
-     * Pesan yang dikirim oleh user ini.
-     */
+    // === RELASI CHAT ===
     public function sentMessages()
     {
         return $this->hasMany(Message::class, 'sender_id');
     }
 
-    /**
-     * Pesan yang diterima oleh user ini.
-     */
     public function receivedMessages()
     {
         return $this->hasMany(Message::class, 'receiver_id');
