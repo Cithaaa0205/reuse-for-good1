@@ -1,59 +1,84 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+@extends('layouts.app')
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+@section('title', 'Tentang Reuse For Good')
 
-## About Laravel
+{{-- Set true agar tombol back muncul di header --}}
+@section('showBackButton', true)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+@section('content')
+<div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+    <!-- Header Hitam -->
+    <div class="bg-gray-900 text-white p-10 md:p-16 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-3">Tentang ReuseForGood</h1>
+        <p class="text-lg md:text-xl text-gray-300">Mengubah barang bekas menjadi harapan baru bagi sesama</p>
+    </div>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+    
+    <!-- Konten Utama -->
+    <div class="p-6 md:p-12">
+        <!-- Grid 3 Kolom -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <!-- Kolom 1: Logo & Deskripsi -->
+            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 text-center flex flex-col items-center">
+                <img src="{{ asset('foto/Logo.png') }}"  alt="Logo RFG" class="w-32 h-32 rounded-full mb-4 border-4 border-white shadow-md">
+                <h3 class="text-xl font-semibold mb-2">REUSEFORGOOD</h3>
+                <p class="text-gray-700 text-sm">
+                    Adalah platform digital yang menghubungkan pendonasi dengan penerima barang bekas layak pakai. Kami percaya setiap barang bekas memiliki nilai guna yang bisa terus dimanfaatkan.
+                </p>
+            </div>
+            
+            <!-- Kolom 2: Sejarah -->
+            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 text-center flex flex-col items-center">
+                <img src="{{ asset('foto/Starpride2.png') }}"  alt="Tim ReuseForGood" class="w-full h-40 object-cover rounded-lg mb-4">
+                <h3 class="text-xl font-semibold mb-2">Dibentuk pada: 19 Februari 2025</h3>
+                <p class="text-gray-700 text-sm">
+                    <strong>Latar Belakang:</strong> Bagian dari tugas Rekayasa Perangkat Lunak dan dikembangkan lebih lanjut pada Proyek Informatika sebagai bentuk kepedulian terhadap barang yang terbuang sia-sia.
+                </p>
+            </div>
 
-## Learning Laravel
+            <!-- Kolom 3: Tim Kami -->
+            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 text-center flex flex-col items-center">
+                <img src="{{ asset('foto/Starpride1.png') }}" alt="Tim ReuseForGood" class="w-full h-40 object-cover rounded-lg mb-4">
+                <h3 class="text-xl font-semibold mb-2">TIM KAMI</h3>
+                <p class="text-gray-700 text-sm">
+                    REUSEFORGOOD dikembangkan oleh Mahasiswa yang peduli terhadap pemanfaatan barang bekas dan pengembangan teknologi untuk kebaikan sosial.
+                </p>
+            </div>
+        </div>
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+        <!-- Bagian Contact Us -->
+        <div class="text-center mb-10">
+            <img src="{{ asset('foto/Logo.png') }}" alt="Logo RFG" class="w-36 h-36 rounded-full mb-4 border-4 border-white shadow-lg mx-auto">
+            <h2 class="text-3xl font-bold text-blue-600 mb-2">Contact Us</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Gunakan informasi di bawah ini untuk menghubungi kami secara langsung atau ajukan pernyataan melalui form kontak
+            </p>
+        </div>
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+        <!-- Grid 4 Kolom Kontak -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="bg-blue-50 p-6 rounded-xl text-center shadow-sm border border-blue-100">
+                <i data-lucide="globe" class="w-12 h-12 text-blue-600 mx-auto mb-3"></i>
+                <h4 class="text-lg font-semibold mb-1">Website</h4>
+                <a href="#" class="text-blue-600 hover:underline">www.reuseforgood.com</a>
+            </div>
+            <div class="bg-blue-50 p-6 rounded-xl text-center shadow-sm border border-blue-100">
+                <i data-lucide="mail" class="w-12 h-12 text-blue-600 mx-auto mb-3"></i>
+                <h4 class="text-lg font-semibold mb-1">Email</h4>
+                <a href="mailto:hello@reuseforgood.com" class="text-blue-600 hover:underline">hello@reuseforgood.com</a>
+            </div>
+            <div class="bg-blue-50 p-6 rounded-xl text-center shadow-sm border border-blue-100">
+                <i data-lucide="phone" class="w-12 h-12 text-blue-600 mx-auto mb-3"></i>
+                <h4 class="text-lg font-semibold mb-1">Telepon</h4>
+                <p class="text-gray-700">123-456-7890</p>
+            </div>
+            <div class="bg-blue-50 p-6 rounded-xl text-center shadow-sm border border-blue-100">
+                <i data-lucide="map-pin" class="w-12 h-12 text-blue-600 mx-auto mb-3"></i>
+                <h4 class="text-lg font-semibold mb-1">Alamat</h4>
+                <p class="text-gray-700">123 Paingan St,Yogyakarta</p>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
