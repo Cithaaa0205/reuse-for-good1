@@ -7,7 +7,6 @@
     @section('showBackButton', true)
 @endif
 
-
 @section('content')
 <div class="max-w-5xl mx-auto">
     <!-- Card Info Profil -->
@@ -18,8 +17,7 @@
                 <img class="h-24 w-24 md:h-32 md:w-32 rounded-full object-cover shadow-md" src="{{ asset('uploads/avatars/' . $user->foto_profil) }}" alt="Foto Profil">
             @else
                 <div class="h-24 w-24 md:h-32 md:w-32 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-5xl shadow-md">
-                    {{-- Ambil 2 huruf awal dari nama lengkap --}}
-                    {{ strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $user->nama_lengkap), 0, 2)) }}
+                    {{ strtoupper(substr($user->nama_lengkap, 0, 2)) }}
                 </div>
             @endif
             
@@ -35,9 +33,13 @@
                     @endif
                 </div>
                 <p class="text-gray-500 mb-1">@<span>{{ $user->username }}</span> · Bergabung {{ $user->created_at->isoFormat('MMMM YYYY') }}</p>
-                <!-- Statistik (Contoh) -->
+                
+                <!-- Statistik -->
                 <div class="flex justify-center sm:justify-start gap-6 text-gray-600 my-3">
                     <span><strong class="text-gray-800">{{ $barangDonasi->count() }}</strong> Donasi</span>
+                    @if(Auth::check() && Auth::id() == $user->id)
+                        <span><strong class="text-gray-800">{{ $barangDiterima->count() }}</strong> Diterima</span>
+                    @endif
                     <span><strong class="text-gray-800">4.8</strong> <i data-lucide="star" class="w-4 h-4 inline-block text-yellow-400 fill-current -mt-1"></i> Rating</span>
                 </div>
                 <p class="text-gray-700 max-w-lg">{{ $user->deskripsi ?? 'Pengguna ini belum menambahkan deskripsi.' }}</p>
@@ -48,7 +50,6 @@
     <!-- Tab Navigasi -->
     <div class="mb-6">
         <div class="border-b border-gray-300">
-            <!-- Tambahkan x-cloak untuk mencegah "flicker" saat load -->
             <nav class="flex -mb-px space-x-6" x-data="{ activeTab: 'donasi' }" x-cloak>
                 <a href="#donasi" @click.prevent="activeTab = 'donasi'"
                    :class="{ 'border-blue-600 text-blue-600': activeTab === 'donasi', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-400': activeTab !== 'donasi' }"
@@ -69,13 +70,11 @@
                         Favorit
                     </a>
                 @endif
-                <!-- === AKHIR TAB PRIVAT === -->
             </nav>
         </div>
     </div>
 
     <!-- Konten Tab -->
-    <!-- Tambahkan x-cloak untuk mencegah "flicker" saat load -->
     <div x-data="{ activeTab: 'donasi' }" x-cloak>
         <!-- Tab 1: Barang Didonasikan (Publik) -->
         <div x-show="activeTab === 'donasi'">
@@ -87,18 +86,15 @@
             @else
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     @foreach($barangDonasi as $item)
-                        <div class="bg-white rounded-xl shadow overflow-hidden">
+                        <div class="bg-white rounded-xl shadow overflow-hidden group hover:shadow-md transition">
                             <a href="{{ route('barang.show', $item->id) }}">
-                                @if($item->foto_barang_utama)
-                                <img src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}" alt="{{ $item->nama_barang }}" class="w-full h-32 md:h-40 object-cover">
-                                @else
-                                <div class="w-full h-32 md:h-40 bg-gray-200 flex items-center justify-center">
-                                    <i data-lucide="image-off" class="w-10 h-10 text-gray-400"></i>
-                                D</div>
-                                @endif
+                                <img src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}" alt="{{ $item->nama_barang }}" class="w-full h-32 md:h-40 object-cover group-hover:opacity-90 transition">
                                 <div class="p-3">
                                     <h4 class="font-semibold truncate text-sm md:text-base">{{ $item->nama_barang }}</h4>
                                     <p class="text-xs text-gray-500 mt-1">{{ $item->lokasi }}</p>
+                                    <span class="mt-2 inline-block px-2 py-0.5 text-[10px] font-semibold rounded-full {{ $item->status == 'Tersedia' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                        {{ $item->status }}
+                                    </span>
                                 </div>
                             </a>
                         </div>
@@ -119,18 +115,15 @@
                 @else
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         @foreach($barangDiterima as $item)
-                            <div class="bg-white rounded-xl shadow overflow-hidden">
+                            <div class="bg-white rounded-xl shadow overflow-hidden group hover:shadow-md transition">
                                 <a href="{{ route('barang.show', $item->id) }}">
-                                    @if($item->foto_barang_utama)
-                                    <img src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}" alt="{{ $item->nama_barang }}" class="w-full h-32 md:h-40 object-cover">
-                                    @else
-                                    <div class="w-full h-32 md:h-40 bg-gray-200 flex items-center justify-center">
-                                        <i data-lucide="image-off" class="w-10 h-10 text-gray-400"></i>
-                                    </div>
-                                    @endif
+                                    <img src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}" alt="{{ $item->nama_barang }}" class="w-full h-32 md:h-40 object-cover group-hover:opacity-90 transition">
                                     <div class="p-3">
                                         <h4 class="font-semibold truncate text-sm md:text-base">{{ $item->nama_barang }}</h4>
-                                        <p class="text-xs text-gray-500 mt-1">{{ $item->lokasi }}</p>
+                                        <p class="text-xs text-gray-500 mt-1">Dari: {{ $item->donatur->nama_lengkap }}</p>
+                                        <span class="mt-2 inline-block px-2 py-0.5 text-[10px] font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            Diterima
+                                        </span>
                                     </div>
                                 </a>
                             </div>
@@ -149,33 +142,31 @@
                 @else
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         @foreach($favorites as $item)
-                            <div class="bg-white rounded-xl shadow overflow-hidden">
+                            <div class="bg-white rounded-xl shadow overflow-hidden group hover:shadow-md transition relative">
                                 <a href="{{ route('barang.show', $item->id) }}">
-                                    @if($item->foto_barang_utama)
-                                    <img src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}" alt="{{ $item->nama_barang }}" class="w-full h-32 md:h-40 object-cover">
-                                    @else
-                                    <div class="w-full h-32 md:h-40 bg-gray-200 flex items-center justify-center">
-                                        <i data-lucide="image-off" class="w-10 h-10 text-gray-400"></i>
-                                    </div>
-                                    @endif
+                                    <img src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}" alt="{{ $item->nama_barang }}" class="w-full h-32 md:h-40 object-cover group-hover:opacity-90 transition">
                                     <div class="p-3">
                                         <h4 class="font-semibold truncate text-sm md:text-base">{{ $item->nama_barang }}</h4>
                                         <p class="text-xs text-gray-500 mt-1">{{ $item->lokasi }}</p>
                                     </div>
                                 </a>
+                                <!-- Tombol Hapus Favorit Cepat -->
+                                <form action="{{ route('favorite.toggle', $item->id) }}" method="POST" class="absolute top-2 right-2 z-10">
+                                    @csrf
+                                    <button type="submit" class="p-1.5 rounded-full bg-white/80 hover:bg-white text-red-500 shadow-sm transition">
+                                        <i data-lucide="heart" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                </form>
                             </div>
                         @endforeach
                     </div>
                 @endif
             </div>
         @endif
-        <!-- === AKHIR KONTEN TAB PRIVAT === -->
     </div>
 </div>
 
-{{-- Script untuk Alpine.js (Tab) --}}
 @push('scripts')
-    <!-- defer memastikan script ini jalan setelah DOM siap -->
     <script src="//unpkg.com/alpinejs" defer></script>
 @endpush
 @endsection

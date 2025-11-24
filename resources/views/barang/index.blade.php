@@ -38,28 +38,11 @@
         <h3 class="text-2xl font-bold mb-4">Rekomendasi untuk Anda</h3>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             @forelse($barang as $item)
-                <div class="bg-white rounded-xl shadow overflow-hidden relative">
-                    <!-- === TOMBOL FAVORIT === -->
-                    @auth
-                        @php $isFavorited = in_array($item->id, $favoriteIds); @endphp
-                        
-                        <!-- Form ini akan mengirim ke rute yang berbeda tergantung $isFavorited -->
-                        <form action="{{ $isFavorited ? route('favorite.destroy', $item->id) : route('favorite.store', $item->id) }}" method="POST" class="absolute top-2 right-2 z-10">
-                            @csrf
-                            @if($isFavorited)
-                                @method('DELETE')
-                            @endif
-                            <button type="submit" class="favorite-btn p-1.5 rounded-full bg-black/30 text-white hover:bg-black/50 transition {{ $isFavorited ? 'favorited' : '' }}">
-                                <i data-lucide="heart" class="w-5 h-5 icon-outline"></i>
-                                <i data-lucide="heart" class="w-5 h-5 icon-filled fill-current {{ $isFavorited ? 'text-red-500' : '' }}"></i>
-                            </button>
-                        </form>
-                    @endauth
-                    <!-- === AKHIR TOMBOL FAVORIT === -->
+                <div class="bg-white rounded-xl shadow overflow-hidden relative group">
                     
-                    <a href="{{ route('barang.show', $item->id) }}">
+                    <!-- 1. Link Gambar -->
+                    <a href="{{ route('barang.show', $item->id) }}" class="block relative z-0">
                         @if($item->foto_barang_utama)
-                        {{-- Ini adalah path gambar yang BENAR --}}
                         <img src="{{ asset('uploads/barang/'. $item->foto_barang_utama) }}" alt="{{ $item->nama_barang }}" class="w-full h-32 md:h-40 object-cover hover:opacity-90 transition-opacity">
                         @else
                         <div class="w-full h-32 md:h-40 bg-gray-200 flex items-center justify-center">
@@ -67,25 +50,40 @@
                         </div>
                         @endif
                         <div class="p-3">
-                            <h4 class="font-semibold truncate text-sm md:text-base">{{ $item->nama_barang }}</h4>
+                            <h4 class="font-semibold truncate text-sm md:text-base text-gray-800">{{ $item->nama_barang }}</h4>
                             <p class="text-xs text-gray-500 mt-1">{{ $item->lokasi }}</p>
                         </div>
                     </a>
+
+                    <!-- 2. Tombol Favorit (Dipindah ke Bawah & Z-Index Tinggi agar bisa diklik) -->
+                    @auth
+                        @php $isFavorited = in_array($item->id, $favoriteIds); @endphp
+                        
+                        <form action="{{ route('favorite.toggle', $item->id) }}" method="POST" class="absolute top-2 right-2 z-20">
+                            @csrf
+                            <button type="submit" class="favorite-btn p-2 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-red-500 shadow-sm transition {{ $isFavorited ? 'favorited text-red-500' : '' }}">
+                                <i data-lucide="heart" class="w-5 h-5 icon-outline"></i>
+                                <i data-lucide="heart" class="w-5 h-5 icon-filled fill-current"></i>
+                            </button>
+                        </form>
+                    @endauth
+
                 </div>
             @empty
-                 <p class="text-gray-600 col-span-full text-center py-10">
-                    <i data-lucide="search-x" class="w-12 h-12 mx-auto text-gray-400 mb-4"></i>
-                    Belum ada barang di etalase
-                    @if(request()->has('kategori'))
-                        untuk kategori ini.
-                    @endif
-                </p>
+                 <div class="text-center py-10 col-span-full">
+                    <div class="bg-white p-8 rounded-2xl shadow-sm inline-block">
+                        <i data-lucide="search-x" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+                        <p class="text-gray-600 font-medium">Belum ada barang di etalase</p>
+                        @if(request()->has('kategori'))
+                            <p class="text-sm text-gray-500 mt-1">untuk kategori ini.</p>
+                        @endif
+                    </div>
+                </div>
             @endforelse
         </div>
 
         <!-- Pagination -->
         <div class="mt-8">
-            {{-- Tampilkan pagination, dan pastikan filter kategori tetap ada --}}
             {{ $barang->withQueryString()->links() }}
         </div>
     </div>

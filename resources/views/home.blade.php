@@ -18,21 +18,18 @@
 
     <!-- Grid Aksi Utama -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Donasikan Barang -->
         <a href="{{ route('barang.create') }}" class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow text-center">
             <i data-lucide="gift" class="w-16 h-16 text-blue-500 mx-auto mb-4"></i>
             <h2 class="text-xl font-bold mb-2">DONASIKAN BARANG</h2>
             <p class="text-gray-600 mb-4">Berbagi barang layak pakai untuk membantu sesama</p>
             <span class="font-medium text-blue-500">Mulai &rarr;</span>
         </a>
-        <!-- Terima Barang -->
         <a href="{{ route('barang.index') }}" class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow text-center">
             <i data-lucide="package-check" class="w-16 h-16 text-green-500 mx-auto mb-4"></i>
             <h2 class="text-xl font-bold mb-2">TERIMA BARANG</h2>
             <p class="text-gray-600 mb-4">Menerima bantuan barang sesuai kebutuhan secara gratis</p>
             <span class="font-medium text-green-500">Mulai &rarr;</span>
         </a>
-        <!-- Chat Room (DIUPDATE) -->
         <a href="{{ route('chat.index') }}" class="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow text-center">
             <i data-lucide="messages-square" class="w-16 h-16 text-purple-500 mx-auto mb-4"></i>
             <h2 class="text-xl font-bold mb-2">CHAT ROOM</h2>
@@ -70,22 +67,10 @@
         <h3 class="text-2xl font-bold mb-4">Barang Terbaru di Sekitar Anda</h3>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             @forelse($barangTerbaru as $item)
-                <div class="bg-white rounded-xl shadow overflow-hidden relative">
-                    <!-- === TOMBOL FAVORIT === -->
-                    @auth
-                        @php $isFavorited = in_array($item->id, $favoriteIds); @endphp
-                        
-                        <form action="{{ route('favorite.toggle', $item->id) }}" method="POST" class="absolute top-2 right-2 z-10">
-                            @csrf
-                            <button type="submit" class="favorite-btn p-1.5 rounded-full bg-black/30 text-white hover:bg-black/50 transition {{ $isFavorited ? 'favorited' : '' }}">
-                                <i data-lucide="heart" class="w-5 h-5 icon-outline"></i>
-                                <i data-lucide="heart" class="w-5 h-5 icon-filled fill-current {{ $isFavorited ? 'text-red-500' : '' }}"></i>
-                            </button>
-                        </form>
-                    @endauth
-                    <!-- === AKHIR TOMBOL FAVORIT === -->
+                <div class="bg-white rounded-xl shadow overflow-hidden relative group">
                     
-                    <a href="{{ route('barang.show', $item->id) }}">
+                    <!-- 1. Link Gambar (Sekarang di Atas dalam Kode, di Bawah secara Visual) -->
+                    <a href="{{ route('barang.show', $item->id) }}" class="block relative z-0">
                         @if($item->foto_barang_utama)
                         <img src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}" alt="{{ $item->nama_barang }}" class="w-full h-32 md:h-40 object-cover hover:opacity-90 transition-opacity">
                         @else
@@ -94,10 +79,24 @@
                         </div>
                         @endif
                         <div class="p-3">
-                            <h4 class="font-semibold truncate text-sm md:text-base">{{ $item->nama_barang }}</h4>
+                            <h4 class="font-semibold truncate text-sm md:text-base text-gray-800">{{ $item->nama_barang }}</h4>
                             <p class="text-xs text-gray-500 mt-1">{{ $item->lokasi }}</p>
                         </div>
                     </a>
+
+                    <!-- 2. Tombol Favorit (Dipindah ke BAWAH agar menimpa Link) -->
+                    @auth
+                        @php $isFavorited = in_array($item->id, $favoriteIds); @endphp
+                        
+                        <form action="{{ route('favorite.toggle', $item->id) }}" method="POST" class="absolute top-2 right-2 z-20">
+                            @csrf
+                            <button type="submit" class="favorite-btn p-2 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-red-500 shadow-sm transition {{ $isFavorited ? 'favorited text-red-500' : '' }}">
+                                <i data-lucide="heart" class="w-5 h-5 icon-outline"></i>
+                                <i data-lucide="heart" class="w-5 h-5 icon-filled fill-current"></i>
+                            </button>
+                        </form>
+                    @endauth
+                    
                 </div>
             @empty
                 <p class="text-gray-600 col-span-full text-center py-10">

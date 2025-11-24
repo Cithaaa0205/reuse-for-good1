@@ -2,7 +2,6 @@
 
 @section('title', $barang->nama_barang)
 
-{{-- Tampilkan tombol back --}}
 @section('showBackButton', true)
 
 @section('content')
@@ -10,7 +9,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         
         <!-- Kolom Kiri: Gambar -->
-        <div>
+        <div class="relative z-0">
             @if($barang->foto_barang_utama)
             <img src="{{ asset('uploads/barang/' . $barang->foto_barang_utama) }}" alt="{{ $barang->nama_barang }}" class="w-full h-auto object-cover rounded-2xl shadow-lg aspect-square">
             @else
@@ -18,25 +17,25 @@
                 <i data-lucide="image-off" class="w-20 h-20 text-gray-400"></i>
             </div>
             @endif
-            <!-- Galeri foto tambahan bisa ditambahkan di sini -->
         </div>
 
         <!-- Kolom Kanan: Info & Aksi -->
         <div class="flex flex-col gap-6">
             <!-- Info Utama -->
-            <div class="bg-white p-6 rounded-2xl shadow-md">
-                <div class="flex justify-between items-start mb-3">
+            <div class="bg-white p-6 rounded-2xl shadow-md relative z-10">
+                <!-- PERBAIKAN: Tambahkan z-index pada header judul -->
+                <div class="flex justify-between items-start mb-3 relative z-20">
                     <h1 class="text-3xl font-bold text-gray-900">{{ $barang->nama_barang }}</h1>
                     
                     <!-- Tombol Favorit -->
                     @auth
                         @php $isFavorited = in_array($barang->id, $favoriteIds ?? []); @endphp
                         
-                        <form action="{{ route('favorite.toggle', $barang->id) }}" method="POST" class="z-10">
+                        <form action="{{ route('favorite.toggle', $barang->id) }}" method="POST">
                             @csrf
-                            <button type="submit" class="favorite-btn p-1.5 rounded-full text-gray-400 hover:text-red-500 transition {{ $isFavorited ? 'favorited' : '' }}">
+                            <button type="submit" class="favorite-btn p-2 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-red-500 transition border border-gray-200 {{ $isFavorited ? 'favorited text-red-500' : '' }}">
                                 <i data-lucide="heart" class="w-6 h-6 icon-outline"></i>
-                                <i data-lucide="heart" class="w-6 h-6 icon-filled fill-current {{ $isFavorited ? 'text-red-500' : '' }}"></i>
+                                <i data-lucide="heart" class="w-6 h-6 icon-filled fill-current"></i>
                             </button>
                         </form>
                     @endauth
@@ -54,7 +53,7 @@
             </div>
 
             <!-- Info Donatur -->
-            <div class="bg-white p-6 rounded-2xl shadow-md">
+            <div class="bg-white p-6 rounded-2xl shadow-md relative z-0">
                 <a href="{{ route('profile.show', $barang->donatur->username) }}" class="flex items-center gap-4 group">
                     @if($barang->donatur->foto_profil)
                         <img class="h-14 w-14 rounded-full object-cover" src="{{ asset('uploads/avatars/' . $barang->donatur->foto_profil) }}" alt="Avatar">
@@ -71,12 +70,11 @@
             </div>
 
             <!-- Tombol Aksi -->
-            <div class="bg-white p-6 rounded-2xl shadow-md">
+            <div class="bg-white p-6 rounded-2xl shadow-md relative z-0">
                 @if(Auth::check())
                     {{-- 1. Jika user adalah PEMILIK barang --}}
                     @if(Auth::id() == $barang->donatur_id)
                         <p class="text-center text-gray-600 mb-3">Ini adalah donasi Anda.</p>
-                        <!-- Form Hapus Donasi -->
                         <form action="{{ route('barang.destroy', $barang->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus donasi ini?');">
                             @csrf
                             @method('DELETE')
@@ -90,7 +88,7 @@
                         <form action="{{ route('request.store', $barang->id) }}" method="POST">
                             @csrf
                             @if($sudahDiajukan)
-                                <button type="button" disabled class="w-full bg-gray-400 text-white font-bold py-3 px-4 rounded-lg cursor-not-allowed">
+                                <button type="button" disabled class="w-full bg-gray-300 text-gray-500 font-bold py-3 px-4 rounded-lg cursor-not-allowed">
                                     Sudah Diajukan
                                 </button>
                             @elseif($barang->status == 'Tersedia')
@@ -98,13 +96,12 @@
                                     Ajukan Penerimaan Barang
                                 </button>
                             @else
-                                <button type="button" disabled class="w-full bg-red-400 text-white font-bold py-3 px-4 rounded-lg cursor-not-allowed">
+                                <button type="button" disabled class="w-full bg-gray-300 text-gray-500 font-bold py-3 px-4 rounded-lg cursor-not-allowed">
                                     Barang Tidak Tersedia
                                 </button>
                             @endif
                         </form>
                         
-                        <!-- Tombol Hubungi Pendonasi (DIUPDATE) -->
                         <a href="{{ route('chat.show', $barang->donatur->id) }}" class="block text-center w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg transition duration-300 mt-3">
                             Hubungi Pendonasi
                         </a>
@@ -119,7 +116,7 @@
             </div>
 
             <!-- Aksi Lain -->
-            <div class="flex justify-around bg-white p-4 rounded-2xl shadow-md">
+            <div class="flex justify-around bg-white p-4 rounded-2xl shadow-md relative z-0">
                 <button class="flex items-center gap-2 text-gray-600 hover:text-blue-600">
                     <i data-lucide="share-2" class="w-5 h-5"></i> Bagikan
                 </button>
@@ -131,11 +128,11 @@
     </div>
 
     <!-- Barang Serupa -->
-    <div class="mt-12">
+    <div class="mt-12 relative z-0">
         <h3 class="text-2xl font-bold mb-4">Barang Serupa</h3>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             @forelse($barangSerupa as $item)
-                <div class="bg-white rounded-xl shadow overflow-hidden">
+                <div class="bg-white rounded-xl shadow overflow-hidden hover:shadow-lg transition">
                     <a href="{{ route('barang.show', $item->id) }}">
                         @if($item->foto_barang_utama)
                         <img src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}" alt="{{ $item->nama_barang }}" class="w-full h-32 md:h-40 object-cover">

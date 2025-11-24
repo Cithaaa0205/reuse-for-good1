@@ -11,9 +11,10 @@ use Illuminate\Routing\Controller;
 class FavoriteController extends Controller
 {
     /**
-     * Tambah barang ke favorit
+     * Toggle Favorite: Jika belum ada -> tambah, Jika sudah ada -> hapus.
+     * Fungsi ini dipanggil oleh rute 'favorite.toggle'
      */
-    public function store(Request $request, $barangId)
+    public function toggle(Request $request, $barangId)
     {
         $userId = Auth::id();
 
@@ -26,37 +27,20 @@ class FavoriteController extends Controller
         // Cek apakah sudah difavoritkan
         $existingFavorite = Favorite::where('user_id', $userId)
                                     ->where('barang_donasi_id', $barangId)
-                                    ->exists();
+                                    ->first();
 
         if ($existingFavorite) {
-            return back()->with('info', 'Barang ini sudah ada di favorit Anda.');
-        }
-
-        // Tambahkan ke favorit
-        Favorite::create([
-            'user_id' => $userId,
-            'barang_donasi_id' => $barangId,
-        ]);
-
-        return back()->with('success', 'Barang ditambahkan ke favorit!');
-    }
-
-    /**
-     * Hapus barang dari favorit
-     */
-    public function destroy($barangId)
-    {
-        $userId = Auth::id();
-        
-        $favorite = Favorite::where('user_id', $userId)
-                            ->where('barang_donasi_id', $barangId)
-                            ->first();
-
-        if ($favorite) {
-            $favorite->delete();
+            // Jika sudah ada, hapus (Unfavorite)
+            $existingFavorite->delete();
+            // Kita kembalikan 'success' agar notifikasi muncul
             return back()->with('success', 'Barang dihapus dari favorit.');
+        } else {
+            // Jika belum ada, tambahkan (Favorite)
+            Favorite::create([
+                'user_id' => $userId,
+                'barang_donasi_id' => $barangId,
+            ]);
+            return back()->with('success', 'Barang ditambahkan ke favorit!');
         }
-
-        return back()->with('error', 'Barang tidak ditemukan di favorit Anda.');
     }
 }

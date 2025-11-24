@@ -4,130 +4,167 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Reuse For Good')</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icon Lucide -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Alpine.js (Wajib untuk fitur Klik/Dropdown) -->
+    <script src="//unpkg.com/alpinejs" defer></script>
+
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #F0F4F8; /* Latar belakang abu-abu muda */
+            background-color: #F0F4F8; 
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #c5c5c5; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
 
-        /* Kustomisasi pagination Tailwind */
-        .pagination { display: flex; justify-content: center; align-items: center; padding: 1rem 0; }
-        .pagination span, .pagination a {
-            padding: 0.5rem 0.75rem;
-            margin: 0 0.25rem;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-            text-decoration: none;
+        /* Pagination Styling */
+        .pagination { display: flex; justify-content: center; padding: 1rem 0; }
+        .pagination .page-item { margin: 0 0.25rem; }
+        .pagination .page-link {
+            display: block; padding: 0.5rem 0.75rem; border-radius: 0.5rem;
+            color: #4B5563; background-color: #FFFFFF; border: 1px solid #D1D5DB;
+            text-decoration: none; transition: all 0.2s;
         }
+        .pagination .page-link:hover { background-color: #F3F4F6; }
         .pagination .page-item.active .page-link {
-            background-color: #2563EB; /* bg-blue-600 */
-            color: white;
-            font-weight: 600;
+            background-color: #2563EB; color: #FFFFFF; border-color: #2563EB;
         }
-        .pagination .page-item:not(.active) .page-link {
-            background-color: white;
-            color: #4B5563; /* text-gray-600 */
-        }
-        .pagination .page-item:not(.active) .page-link:hover {
-            background-color: #F3F4F6; /* bg-gray-100 */
-        }
-        .pagination .page-item.disabled .page-link {
-            color: #D1D5DB; /* text-gray-300 */
-            cursor: not-allowed;
-        }
+        .pagination .page-item.disabled .page-link { color: #D1D5DB; cursor: not-allowed; }
 
-        /* === TAMBAHAN CSS FAVORIT === */
+        /* CSS Favorit */
         .favorite-btn .icon-outline { display: block; }
         .favorite-btn .icon-filled { display: none; }
         .favorite-btn.favorited .icon-outline { display: none; }
         .favorite-btn.favorited .icon-filled { display: block; }
-        /* === AKHIR TAMBAHAN === */
+        
+        /* Mencegah flickering pada elemen Alpine.js */
+        [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen flex flex-col">
 
     <!-- Header Utama -->
-    <header class="bg-white p-4 shadow-md sticky top-0 z-50">
-        <nav class="container mx-auto max-w-7xl flex items-center justify-between">
-            
-            <!-- Logo dan Tombol Back -->
-            <div class="flex items-center gap-4">
-                @hasSection('showBackButton')
-                    <a href="javascript:history.back()" class="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100">
-                        <i data-lucide="arrow-left" class="w-6 h-6"></i>
-                    </a>
-                @else
-                    <a href="{{ route('home') }}" class="flex items-center gap-2">
-                        <span class="text-2xl font-bold text-blue-600">Reuse For Good</span>
-                    </a>
-                @endif
-            </div>
-
-            <!-- Search (Hanya tampil di halaman tertentu jika diperlukan) -->
-            @if(Route::is('barang.index'))
-            <div class="hidden md:block w-full max-w-md">
-                <div class="relative">
-                    <input type="text" placeholder="Cari Barang..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                </div>
-            </div>
-            @endif
-
-            <!-- Navigasi Kanan -->
-            <div class="flex items-center gap-4">
-                <a href="{{ route('about') }}" class="hidden md:block text-gray-600 font-medium hover:text-blue-600">Tentang Kami</a>
-                <a href="{{ route('barang.create') }}" class="hidden md:block text-gray-600 font-medium hover:text-blue-600">Donasi</a>
-                <a href="{{ route('barang.index') }}" class="hidden md:block text-gray-600 font-medium hover:text-blue-600">Terima</a>
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
                 
-                <a href="#" class="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100">
-                    <i data-lucide="message-circle" class="w-6 h-6"></i>
-                </a>
-
-                <!-- Dropdown Profil -->
-                @auth
-                <div class="relative group pt-2">
-                    <button class="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300 hover:border-blue-500">
-                        <img src="{{ Auth::user()->foto_profil ? asset('uploads/avatars/' . Auth::user()->foto_profil) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->nama_lengkap) . '&background=E0F7FA&color=0284C7' }}" 
-                             alt="Avatar" class="w-full h-full object-cover">
-                    </button>
-                    <!-- Menu Dropdown (Perbaikan CSS Celah) -->
-                    <div class="absolute right-0 w-48 bg-white rounded-lg shadow-xl overflow-hidden hidden group-hover:block">
-                        <a href="{{ route('profile.show', Auth::user()->username) }}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Profil Saya</a>
-                        <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Kelola Pengajuan</a>
-                        <div class="border-t border-gray-100"></div>
-                        <form action="{{ route('logout') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="w-full text-left block px-4 py-3 text-sm text-red-600 hover:bg-gray-100">Keluar</button>
-                        </form>
-                    </div>
+                <!-- Kiri: Logo & Tombol Back -->
+                <div class="flex-shrink-0 flex items-center gap-4">
+                    @if(View::hasSection('showBackButton') && View::getSection('showBackButton'))
+                        <a href="@yield('backButtonUrl', 'javascript:history.back()')" class="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100 transition">
+                            <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                        </a>
+                    @endif
+                    <a href="{{ route('home') }}" class="flex items-center gap-2 group">
+                        <!-- Pastikan file logo ada di public/foto/Logo.png -->
+                        <img class="h-10 w-10 group-hover:scale-105 transition-transform" src="{{ asset('foto/Logo.png') }}" alt="Logo">
+                        <span class="font-bold text-xl text-blue-600 hidden sm:inline">Reuse For Good</span>
+                    </a>
                 </div>
-                @endauth
+
+                <!-- Tengah: Navigasi Utama (Desktop) -->
+                <div class="hidden md:flex md:items-center md:space-x-1">
+                    <a href="{{ route('about') }}" class="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition">Tentang Kami</a>
+                    <a href="{{ route('barang.create') }}" class="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition">Donasi</a>
+                    <a href="{{ route('barang.index') }}" class="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition">Terima</a>
+                </div>
+
+                <!-- Kanan: Ikon & Profil -->
+                <div class="flex items-center gap-2 sm:gap-4">
+                    @guest
+                        <a href="{{ route('login') }}" class="text-sm font-medium text-blue-600 hover:text-blue-500 px-3 py-2">Masuk</a>
+                        <a href="{{ route('register') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm">
+                            Daftar
+                        </a>
+                    @endguest
+                    
+                    @auth
+                        <!-- Tombol Chat -->
+                        <a href="{{ route('chat.index') }}" class="text-gray-500 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100 transition relative">
+                            <i data-lucide="message-circle" class="w-6 h-6"></i>
+                        </a>
+
+                        <!-- Dropdown Profil (Menggunakan Alpine.js MURNI, Hapus Hover CSS) -->
+                        <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                            
+                            <!-- Tombol Pemicu (Avatar) -->
+                            <button @click="open = !open" class="flex items-center focus:outline-none border-2 border-transparent hover:border-blue-100 rounded-full transition p-0.5">
+                                @if(Auth::user()->foto_profil)
+                                    <img class="h-9 w-9 rounded-full object-cover shadow-sm" src="{{ asset('uploads/avatars/' . Auth::user()->foto_profil) }}" alt="Foto">
+                                @else
+                                    <div class="h-9 w-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                                        {{ strtoupper(substr(Auth::user()->nama_lengkap, 0, 2)) }}
+                                    </div>
+                                @endif
+                            </button>
+
+                            <!-- Menu Dropdown -->
+                            <div x-show="open" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 x-cloak
+                                 class="origin-top-right absolute right-0 mt-2 w-56 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden">
+                                
+                                <!-- Header Dropdown -->
+                                <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                                    <p class="text-xs text-gray-500 uppercase font-bold">Halo,</p>
+                                    <p class="text-sm font-medium text-gray-900 truncate">{{ Auth::user()->nama_lengkap }}</p>
+                                </div>
+
+                                <!-- Menu Items -->
+                                <div class="py-1">
+                                    <a href="{{ route('profile.show', Auth::user()->username) }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                                        <i data-lucide="user" class="w-4 h-4 mr-3 text-gray-400"></i> Profil Saya
+                                    </a>
+                                    <a href="{{ route('request.manage') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                                        <i data-lucide="inbox" class="w-4 h-4 mr-3 text-gray-400"></i> Kelola Pengajuan
+                                    </a>
+                                </div>
+
+                                <!-- Footer Dropdown (Logout) -->
+                                <div class="border-t border-gray-100 bg-gray-50 py-1">
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition font-medium">
+                                            <i data-lucide="log-out" class="w-4 h-4 mr-3"></i> Keluar
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @endauth
+                </div>
             </div>
         </nav>
     </header>
 
     <!-- Konten Halaman -->
-    <main class="container mx-auto max-w-7xl p-4 md:p-6">
+    <main class="flex-grow container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         @yield('content')
     </main>
 
+    <!-- Script Inisialisasi Ikon -->
     <script>
-        // Panggil createIcons SETELAH DOM siap
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
         });
     </script>
     
-    {{-- Stack untuk script tambahan per halaman --}}
     @stack('scripts')
 </body>
 </html>
