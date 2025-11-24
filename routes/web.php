@@ -66,21 +66,6 @@ Route::middleware('auth')->group(function () {
     // === AKHIR RUTE CHAT ===
 
     // Rute untuk Request Barang
-    // Dashboard pengajuan donatur
-    Route::get('/dashboard/pengajuan', [RequestBarangController::class, 'index'])
-        ->middleware('auth')
-        ->name('request.dashboard');
-
-    // Approve
-    Route::post('/request/{id}/approve', [RequestBarangController::class, 'approve'])
-        ->middleware('auth')
-        ->name('request.approve');
-
-    // Reject
-    Route::post('/request/{id}/reject', [RequestBarangController::class, 'reject'])
-        ->middleware('auth')
-        ->name('request.reject');
-
     // Gunakan {barangDonasi} (Route Model Binding)
     Route::post('request/{barangDonasi}', [RequestBarangController::class, 'store'])->name('request.store');
 });

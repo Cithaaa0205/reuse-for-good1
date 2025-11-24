@@ -73,14 +73,10 @@ class User extends Authenticatable
      * Relasi untuk mengambil barang-barang yang difavoritkan user.
      * (Relasi Many-to-Many)
      */
-    // === RELASI FAVORIT ===
-public function favorites()
-{
-    // relasi many-to-many ke BarangDonasi lewat tabel pivot 'favorites'
-    return $this->belongsToMany(BarangDonasi::class, 'favorites', 'user_id', 'barang_donasi_id')
-                ->withTimestamps();
-}
-
+    public function favorites()
+    {
+        return $this->belongsToMany(BarangDonasi::class, 'favorites', 'user_id', 'barang_donasi_id');
+    }
 
     // === RELASI BARU UNTUK FITUR CHAT ===
 

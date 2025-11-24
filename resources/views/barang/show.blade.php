@@ -30,22 +30,17 @@
                     
                     <!-- Tombol Favorit -->
                     @auth
-    @php
-        // cek apakah barang ini sudah ada di favorit user saat ini
-        $isFavorited = Auth::user()
-            ->favorites
-            ->contains($barang->id);
-    @endphp
-    
-    <form action="{{ route('favorite.toggle', $barang->id) }}" method="POST" class="z-10">
-        @csrf
-        <button type="submit" class="favorite-btn p-1.5 rounded-full text-gray-400 hover:text-red-500 transition {{ $isFavorited ? 'favorited' : '' }}">
-            <i data-lucide="heart" class="w-6 h-6 icon-outline"></i>
-            <i data-lucide="heart" class="w-6 h-6 icon-filled fill-current {{ $isFavorited ? 'text-red-500' : '' }}"></i>
-        </button>
-    </form>
-@endauth
-
+                        @php $isFavorited = in_array($barang->id, $favoriteIds ?? []); @endphp
+                        
+                        <form action="{{ route('favorite.toggle', $barang->id) }}" method="POST" class="z-10">
+                            @csrf
+                            <button type="submit" class="favorite-btn p-1.5 rounded-full text-gray-400 hover:text-red-500 transition {{ $isFavorited ? 'favorited' : '' }}">
+                                <i data-lucide="heart" class="w-6 h-6 icon-outline"></i>
+                                <i data-lucide="heart" class="w-6 h-6 icon-filled fill-current {{ $isFavorited ? 'text-red-500' : '' }}"></i>
+                            </button>
+                        </form>
+                    @endauth
+                </div>
                 
                 @if($barang->kategori)
                 <span class="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full mb-4">
@@ -93,26 +88,21 @@
                     {{-- 2. Jika user adalah PENGUNJUNG --}}
                     @else
                         <form action="{{ route('request.store', $barang->id) }}" method="POST">
-    @csrf
-
-    {{-- PENTING: kirim id barang ke controller --}}
-    <input type="hidden" name="barang_donasi_id" value="{{ $barang->id }}">
-
-    @if($sudahDiajukan)
-        <button type="button" disabled class="w-full bg-gray-400 text-white font-bold py-3 px-4 rounded-lg cursor-not-allowed">
-            Sudah Diajukan
-        </button>
-    @elseif($barang->status == 'Tersedia')
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
-            Ajukan Penerimaan Barang
-        </button>
-    @else
-        <button type="button" disabled class="w-full bg-red-400 text-white font-bold py-3 px-4 rounded-lg cursor-not-allowed">
-            Barang Tidak Tersedia
-        </button>
-    @endif
-</form>
-
+                            @csrf
+                            @if($sudahDiajukan)
+                                <button type="button" disabled class="w-full bg-gray-400 text-white font-bold py-3 px-4 rounded-lg cursor-not-allowed">
+                                    Sudah Diajukan
+                                </button>
+                            @elseif($barang->status == 'Tersedia')
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
+                                    Ajukan Penerimaan Barang
+                                </button>
+                            @else
+                                <button type="button" disabled class="w-full bg-red-400 text-white font-bold py-3 px-4 rounded-lg cursor-not-allowed">
+                                    Barang Tidak Tersedia
+                                </button>
+                            @endif
+                        </form>
                         
                         <!-- Tombol Hubungi Pendonasi (DIUPDATE) -->
                         <a href="{{ route('chat.show', $barang->donatur->id) }}" class="block text-center w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg transition duration-300 mt-3">
@@ -139,8 +129,6 @@
             </div>
         </div>
     </div>
-
-    
 
     <!-- Barang Serupa -->
     <div class="mt-12">
