@@ -58,7 +58,7 @@
             <input type="file" id="foto_barang" name="foto_barang[]" accept="image/*" class="hidden" multiple>
         </div>
 
-        <!-- INFORMASI -->
+        <!-- INFORMASI BARANG -->
         <div class="bg-white p-6 rounded-2xl shadow-md mb-6">
             <h2 class="text-xl font-bold mb-4">Informasi Barang</h2>
 
@@ -124,7 +124,7 @@
             </div>
         </div>
 
-        <!-- TOMBOL -->
+        <!-- BUTTON -->
         <div class="flex items-center gap-4">
             <a href="{{ route('home') }}" class="w-1/3 text-center bg-gray-200 py-3 rounded-lg font-bold">Batal</a>
             <button type="submit" class="w-2/3 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold">
@@ -140,9 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     lucide.createIcons();
 
-    // ===============================
-    // PROVINSI - KABUPATEN
-    // ===============================
+    // =============================== PROVINSI - KABUPATEN ===============================
     const kabupatenData = {
         "DI Yogyakarta": ["Yogyakarta", "Sleman", "Bantul", "Kulon Progo", "Gunungkidul"],
         "Jawa Tengah": ["Semarang", "Surakarta", "Magelang", "Tegal", "Purwokerto"],
@@ -155,16 +153,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     provinsiSelect.addEventListener("change", function () {
         kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-        if (kabupatenData[this.value]) {
-            kabupatenData[this.value].forEach(k => {
-                kabupatenSelect.insertAdjacentHTML("beforeend", `<option value="${k}">${k}</option>`);
-            });
-        }
+        const list = kabupatenData[this.value] || [];
+        list.forEach(k => kabupatenSelect.insertAdjacentHTML("beforeend", `<option value="${k}">${k}</option>`));
     });
 
-    // ===============================
-    // MULTIPLE UPLOAD FOTO
-    // ===============================
+    // =============================== MULTIPLE IMAGE UPLOAD W/ DELETE ===============================
     const inputFoto = document.getElementById("foto_barang");
     const previewContainer = document.getElementById("preview-container");
     const placeholder = document.getElementById("placeholder");
@@ -172,9 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectedFiles = [];
 
     previewContainer.addEventListener("click", (e) => {
-        if (e.target.tagName.toLowerCase() !== "img") {
-            inputFoto.click();
-        }
+        if (!e.target.classList.contains("remove-btn")) inputFoto.click();
     });
 
     inputFoto.addEventListener("change", function () {
@@ -192,10 +183,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const reader = new FileReader();
             reader.onload = (e) => {
-                const img = document.createElement("img");
-                img.src = e.target.result;
-                img.className = "w-full h-40 object-contain rounded-lg border cursor-pointer";
-                previewContainer.appendChild(img);
+                const wrapper = document.createElement("div");
+                wrapper.className = "relative";
+
+                wrapper.innerHTML = `
+                    <img src="${e.target.result}" class="w-full h-40 object-contain rounded-lg border">
+                    <button type="button"
+                            class="remove-btn absolute top-1 right-1 bg-red-600 text-white w-6 h-6 rounded-full text-xs flex items-center justify-center">
+                        ×
+                    </button>
+                `;
+
+                const removeButton = wrapper.querySelector(".remove-btn");
+                removeButton.addEventListener("click", () => {
+                    const index = Array.from(previewContainer.children).indexOf(wrapper);
+                    selectedFiles.splice(index - 1, 1);
+                    wrapper.remove();
+
+                    if (selectedFiles.length === 0) placeholder.classList.remove("hidden");
+                });
+
+                previewContainer.appendChild(wrapper);
             };
 
             reader.readAsDataURL(file);
@@ -204,10 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
         this.value = "";
     });
 
-    // ===============================
-    // MASUKKAN FILE KE INPUT SAAT SUBMIT
-    // ===============================
-    document.querySelector("form").addEventListener("submit", function (e) {
+    document.querySelector("form").addEventListener("submit", function () {
         const dt = new DataTransfer();
         selectedFiles.forEach(file => dt.items.add(file));
         inputFoto.files = dt.files;
@@ -215,5 +220,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 </script>
+
 </body>
 </html>
