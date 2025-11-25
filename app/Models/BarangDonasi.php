@@ -9,19 +9,20 @@ class BarangDonasi extends Model
 {
     use HasFactory; // Tambahkan ini
 
-    protected $fillable = [
-        'donatur_id',
-        'kategori_id',
-        'nama_barang',
-        'deskripsi',
-        'kondisi',
-        'lokasi',
-        'alamat_lengkap',
-        'foto_barang_utama',
-        'foto_barang_lainnya',
-        'catatan_pengambilan',
-        'status',
-    ];
+ protected $fillable = [
+    'donatur_id',
+    'kategori_id',
+    'nama_barang',
+    'deskripsi',
+    'kondisi',
+    'provinsi',
+    'kabupaten',
+    'foto_barang_utama',
+    'foto_barang_lainnya',
+    'catatan_pengambilan',
+    'status',
+];
+
 
     // Relasi: Barang donasi dimiliki oleh satu User (Donatur)
     public function donatur()
