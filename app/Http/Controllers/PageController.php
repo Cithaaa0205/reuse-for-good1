@@ -25,29 +25,25 @@ class PageController extends Controller
      * Halaman Beranda (Home)
      */
     public function home()
-    {
-// ... (statistik tidak berubah)
-// ...
-        $stats = [
-            'barang_didonasikan' => BarangDonasi::count(),
-            'pengguna_aktif' => User::count(),
-            'kota' => BarangDonasi::distinct('lokasi')->count('lokasi'),
-            'tingkat_keberhasilan' => 88
-        ];
-        $barangTerbaru = BarangDonasi::where('status', 'Tersedia')->latest()->take(10)->get();
+{
+    $stats = [
+    'barang_didonasikan' => BarangDonasi::count(),
+    'barang_diterima' => BarangDonasi::where('status', 'Dipesan')->count(), // ✅ pakai "Dipesan"
+    'pengguna_aktif' => User::count(),
+    'kota' => BarangDonasi::distinct('lokasi')->count('lokasi'),
+];
 
-        // === TAMBAHAN BARU ===
-        // Ambil list ID favorit user
-        $favoriteIds = [];
-        if (Auth::check()) {
-            // Ambil ID dari model BarangDonasi yang difavoritkan user
-            // Gunakan nama tabel untuk menghindari ambiguitas kolom 'id'
-            $favoriteIds = Auth::user()->favorites()->pluck('barang_donasis.id')->toArray();
-        }
-        // === AKHIR TAMBAHAN ===
+    $barangTerbaru = BarangDonasi::where('status', 'Tersedia')->latest()->take(10)->get();
 
-        return view('home', compact('stats', 'barangTerbaru', 'favoriteIds')); // Tambahkan favoriteIds
+    // === TAMBAHAN BARU ===
+    $favoriteIds = [];
+    if (Auth::check()) {
+        $favoriteIds = Auth::user()->favorites()->pluck('barang_donasis.id')->toArray();
     }
+    // === AKHIR TAMBAHAN ===
+
+    return view('home', compact('stats', 'barangTerbaru', 'favoriteIds'));
+}
 
     /**
      * Halaman Tentang Kami

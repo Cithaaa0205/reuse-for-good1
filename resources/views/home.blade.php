@@ -39,11 +39,17 @@
     </div>
 
     <!-- Grid Statistik -->
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
     <div class="bg-white p-5 rounded-2xl shadow-md text-center">
         <i data-lucide="package" class="w-8 h-8 text-gray-500 mx-auto mb-2"></i>
         <div class="text-3xl font-bold">{{ number_format($stats['barang_didonasikan']) }}</div>
         <p class="text-gray-600">Barang Didonasikan</p>
+    </div>
+
+    <div class="bg-white p-5 rounded-2xl shadow-md text-center">
+        <i data-lucide="check-circle" class="w-8 h-8 text-green-500 mx-auto mb-2"></i>
+        <div class="text-3xl font-bold">{{ number_format($stats['barang_diterima']) }}</div>
+        <p class="text-gray-600">Barang Diterima</p>
     </div>
 
     <div class="bg-white p-5 rounded-2xl shadow-md text-center">
@@ -58,6 +64,7 @@
         <p class="text-gray-600">Kota</p>
     </div>
 </div>
+
 
     <!-- Barang Terbaru -->
     <div>
