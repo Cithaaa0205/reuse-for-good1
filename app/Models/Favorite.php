@@ -9,29 +9,25 @@ class Favorite extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'barang_donasi_id',
     ];
 
-    /**
-     * Relasi ke BarangDonasi (jika diperlukan)
-     */
     public function barangDonasi()
     {
         return $this->belongsTo(BarangDonasi::class);
     }
 
-    /**
-     * Relasi ke User (jika diperlukan)
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+    // Barang yang DIFAVORITKAN oleh user ini
+public function favorites()
+{
+    return $this->belongsToMany(BarangDonasi::class, 'favorites', 'user_id', 'barang_donasi_id')
+                ->withTimestamps();
+}
+
 }

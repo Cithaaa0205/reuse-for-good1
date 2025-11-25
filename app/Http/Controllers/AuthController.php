@@ -17,23 +17,38 @@ class AuthController extends Controller
     }
 
     // Proses login
-    public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+   
+public function login(Request $request)
+{
+    // Validasi input
+    $credentials = $request->validate([
+        'email'    => ['required', 'email'],
+        'password' => ['required'],
+    ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            // Arahkan ke beranda
-            return redirect()->intended('home');
+    // Coba login (semua user: admin & non-admin)
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+
+        $user = Auth::user();
+
+        // Kalau admin → lempar ke halaman admin
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.users.index');
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->onlyInput('email');
+        // Selain admin → ke home biasa
+        return redirect()->route('home');
+        // atau: return redirect()->intended(route('home'));
     }
+
+    // Kalau gagal login
+    return back()
+        ->withErrors([
+            'email' => 'Email atau password salah.',
+        ])
+        ->onlyInput('email');
+}
 
     // Tampilkan form registrasi
     public function showRegistrationForm()

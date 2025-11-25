@@ -34,7 +34,9 @@ class BarangDonasiController extends Controller
         // Ambil list ID favorit user
         $favoriteIds = [];
         if (Auth::check()) {
-            $favoriteIds = Auth::user()->favorites()->pluck('barang_donasi_id')->toArray();
+            // Ambil ID dari model BarangDonasi yang difavoritkan user
+            // Gunakan nama tabel untuk menghindari ambiguitas kolom 'id'
+            $favoriteIds = Auth::user()->favorites()->pluck('barang_donasis.id')->toArray();
         }
 
         return view('barang.index', compact('barang', 'kategoris', 'favoriteIds')); // Tambahkan favoriteIds

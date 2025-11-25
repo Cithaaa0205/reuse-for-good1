@@ -6,9 +6,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangDonasiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FavoriteController;
-use App\Http\Controllers\ChatController; // <-- Ini penting untuk Chat
-use App\Http\Controllers\RequestBarangController; // <-- Saya tambahkan ini juga
-
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\RequestBarangController;
+use App\Http\Controllers\AdminController;
+use App\Http\Middleware\AdminMiddleware; 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -54,8 +55,11 @@ Route::middleware('auth')->group(function () {
 
     // Rute Favorit
     // Gunakan {barangDonasi} (Route Model Binding)
-    Route::post('favorite/{barangDonasi}', [FavoriteController::class, 'toggle'])->name('favorite.toggle');
-
+    Route::middleware('auth')->group(function () {
+    // ...
+    Route::post('favorite/{barangDonasi}', [FavoriteController::class, 'toggle'])
+        ->name('favorite.toggle');
+});
     // === RUTE CHAT BARU ===
     Route::prefix('chat')->name('chat.')->group(function () {
         Route::get('/', [ChatController::class, 'index'])->name('index'); // Daftar chat
@@ -74,4 +78,27 @@ Route::middleware('auth')->group(function () {
 
     // 3. Rute untuk menerima/menolak pengajuan (Pendonasi) - BARU
     Route::patch('request/{requestBarang}/{status}', [RequestBarangController::class, 'updateStatus'])->name('request.updateStatus');
+
+    // routes/web.php
 });
+
+// Rute khusus Admin Panel
+Route::middleware(['auth', AdminMiddleware::class])   // 👈 BUKAN 'admin' lagi
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        // Manajemen Pengguna
+        Route::get('users', [AdminController::class, 'indexUsers'])->name('users.index');
+        Route::get('users/{user}/edit', [AdminController::class, 'editUser'])->name('users.edit');
+        Route::patch('users/{user}', [AdminController::class, 'updateUser'])->name('users.update');
+        Route::delete('users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
+        
+        // Manajemen Barang Donasi
+        Route::get('barang', [AdminController::class, 'indexBarang'])->name('barang.index');
+        Route::delete('barang/{barang}', [AdminController::class, 'destroyBarang'])->name('barang.destroy');
+    });
+
+
+
+
+
