@@ -79,42 +79,51 @@
             </div>
 
             <!-- TOMBOL AKSI -->
-            <div class="bg-white p-6 rounded-2xl shadow-md">
-                @if(Auth::check())
-                    @if(Auth::id() == $barang->donatur_id)
-                        <p class="text-center text-gray-600 mb-3">Ini adalah donasi Anda.</p>
+<div class="bg-white p-6 rounded-2xl shadow-md">
+    @if(Auth::check())
+        @if(Auth::id() == $barang->donatur_id)
+            <p class="text-center text-gray-600 mb-3">Ini adalah donasi Anda.</p>
 
-                        <form action="{{ route('barang.destroy', $barang->id) }}" method="POST"
-                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus donasi ini?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg">
-                                Hapus Donasi Ini
-                            </button>
-                        </form>
+            <form action="{{ route('barang.destroy', $barang->id) }}" method="POST"
+                onsubmit="return confirm('Apakah Anda yakin ingin menghapus donasi ini?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg">
+                    Hapus Donasi Ini
+                </button>
+            </form>
 
-                    @else
-                        <form action="{{ route('request.store', $barang->id) }}" method="POST">
-                            @csrf
-                            <button type="submit"
-                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg">
-                                Ajukan Penerimaan Barang
-                            </button>
-                        </form>
+        @else
+            @if($barang->status === 'Tersedia')
+                <form action="{{ route('request.store', $barang->id) }}" method="POST">
+                    @csrf
+                    <button type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
+                        <i data-lucide="hand-heart" class="w-5 h-5"></i>
+                        Ajukan Penerimaan Barang
+                    </button>
+                </form>
 
-                        <a href="{{ route('chat.show', $barang->donatur->id) }}"
-                            class="block text-center mt-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg">
-                            Hubungi Pendonasi
-                        </a>
-                    @endif
-                @else
-                    <a href="{{ route('login') }}"
-                        class="block text-center w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg">
-                        Login untuk Mengajukan
-                    </a>
-                @endif
-            </div>
+                <a href="{{ route('chat.show', $barang->donatur->id) }}"
+                    class="block text-center mt-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-lg flex items-center justify-center gap-2">
+                    <i data-lucide="message-circle" class="w-5 h-5"></i>
+                    Hubungi Pendonasi
+                </a>
+            @else
+                <div class="bg-yellow-100 text-yellow-800 p-4 rounded-lg text-center font-semibold flex items-center justify-center gap-2">
+                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    Barang ini telah diterima.
+                </div>
+            @endif
+        @endif
+    @else
+        <a href="{{ route('login') }}"
+            class="block text-center w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg">
+            Login untuk Mengajukan
+        </a>
+    @endif
+</div>
 
         </div>
     </div>
