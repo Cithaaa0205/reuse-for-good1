@@ -12,6 +12,15 @@
         </div>
     @endif
 
+    <!-- 🔍 SEARCH BAR -->
+    <form action="{{ route('barang.index') }}" method="GET" class="mb-6">
+        <input type="text"
+               name="search"
+               value="{{ request('search') }}"
+               placeholder="Cari barang, kategori, lokasi..."
+               class="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-200">
+    </form>
+
     <div class="overflow-x-auto bg-white rounded-xl shadow">
         <table class="min-w-full text-sm">
             <thead class="bg-gray-100 text-gray-700">

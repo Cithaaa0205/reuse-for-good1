@@ -80,6 +80,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('request/{requestBarang}/{status}', [RequestBarangController::class, 'updateStatus'])->name('request.updateStatus');
 
     // routes/web.php
+    Route::prefix('barang')->name('barang.')->group(function () {
+    Route::get('/', [BarangDonasiController::class, 'index'])->name('index');
+    // ...
+});
+
+
 });
 
 // Rute khusus Admin Panel
