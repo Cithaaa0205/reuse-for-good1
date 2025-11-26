@@ -73,7 +73,7 @@ public function login(Request $request)
             'nomor_telepon' => $request->nomor_telepon,
             'username' => $request->username,
             'password' => Hash::make($request->password),
-            'role' => 'donatur' // Default role
+            'role' => 'user' // Default role
         ]);
 
         // === PERUBAHAN DI SINI ===
