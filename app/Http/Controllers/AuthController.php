@@ -76,11 +76,7 @@ public function login(Request $request)
             'role' => 'user' // Default role
         ]);
 
-        // === PERUBAHAN DI SINI ===
-        // 1. Hapus login otomatis
-        // Auth::login($user); 
-
-        // 2. Arahkan kembali ke halaman login dengan pesan sukses
+        //  Arahkan kembali ke halaman login dengan pesan sukses
         return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan masuk dengan akun baru Anda.');
         // === AKHIR PERUBAHAN ===
     }
