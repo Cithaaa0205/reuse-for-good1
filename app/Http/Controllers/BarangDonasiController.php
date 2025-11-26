@@ -16,21 +16,13 @@ class BarangDonasiController extends Controller
      */
     public function index(Request $request)
     {
-        // Ambil semua kategori untuk ditampilkan di halaman
         $kategoris = Kategori::all();
-
-        // Status barang harus "Tersedia"
         $query = BarangDonasi::where('status', 'Tersedia');
 
-        // Cek apakah ada pencarian aktif
         $isSearchActive = $request->filled('search') || $request->filled('kategori');
 
-        // ==========================
-        // 🔍 FITUR SEARCH
-        // ==========================
         if ($request->filled('search')) {
             $keyword = $request->search;
-
             $query->where(function ($q) use ($keyword) {
                 $q->where('nama_barang', 'like', "%{$keyword}%")
                     ->orWhere('deskripsi', 'like', "%{$keyword}%")
@@ -42,9 +34,6 @@ class BarangDonasiController extends Controller
             });
         }
 
-        // ==========================
-        // 🎯 FILTER KATEGORI
-        // ==========================
         if ($request->filled('kategori')) {
             $kategoriSlug = $request->kategori;
             $query->whereHas('kategori', function ($q) use ($kategoriSlug) {
@@ -52,15 +41,10 @@ class BarangDonasiController extends Controller
             });
         }
 
-        // ================================
-        // 📍 FILTER & HITUNG JARAK (KM)
-        // ================================
         if (Auth::check() && Auth::user()->latitude && Auth::user()->longitude) {
-
             $lat = Auth::user()->latitude;
             $lng = Auth::user()->longitude;
 
-            // Tambahkan kolom distance ke query
             $query->selectRaw("
                 *, (6371 * acos(cos(radians(?)) *
                 cos(radians(latitude)) *
@@ -69,17 +53,14 @@ class BarangDonasiController extends Controller
                 sin(radians(latitude)))) AS distance
             ", [$lat, $lng, $lat]);
 
-            // Filter jika user memilih jarak
             if ($request->filled('jarak')) {
                 $query->having("distance", "<=", $request->jarak)
-                      ->orderBy("distance");
+                    ->orderBy("distance");
             }
         }
 
-        // Ambil barang (paginate)
         $barang = $query->latest()->paginate(20);
 
-        // Favorite user (jika login)
         $favoriteIds = [];
         if (Auth::check()) {
             $favoriteIds = Auth::user()
@@ -92,7 +73,7 @@ class BarangDonasiController extends Controller
     }
 
     /**
-     * Menampilkan form untuk membuat donasi baru.
+     * Form buat barang
      */
     public function create()
     {
@@ -101,7 +82,7 @@ class BarangDonasiController extends Controller
     }
 
     /**
-     * Simpan donasi baru ke database.
+     * Simpan barang baru
      */
     public function store(Request $request)
     {
@@ -117,7 +98,6 @@ class BarangDonasiController extends Controller
             'catatan_pengambilan' => 'nullable|string',
         ]);
 
-        // === Upload foto multiple ===
         $fotoUtama = null;
         $fotoLain = [];
 
@@ -126,11 +106,8 @@ class BarangDonasiController extends Controller
                 $namaFile = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
                 $file->move(public_path('uploads/barang'), $namaFile);
 
-                if ($index === 0) {
-                    $fotoUtama = $namaFile;
-                } else {
-                    $fotoLain[] = $namaFile;
-                }
+                if ($index === 0) $fotoUtama = $namaFile;
+                else $fotoLain[] = $namaFile;
             }
         }
 
@@ -151,28 +128,35 @@ class BarangDonasiController extends Controller
         return redirect()->route('home')->with('success', 'Donasi berhasil diposting!');
     }
 
- public function show(BarangDonasi $barang)
-{
-    $barang->load('donatur', 'kategori');
+    /**
+     * Detail barang
+     */
+    public function show(BarangDonasi $barang)
+    {
+        $barang->load('donatur', 'kategori');
 
-    $barangSerupa = BarangDonasi::where('kategori_id', $barang->kategori_id)
-        ->where('id', '!=', $barang->id)
-        ->where('status', 'Tersedia')
-        ->take(5)
-        ->get();
+        $barangSerupa = BarangDonasi::where('kategori_id', $barang->kategori_id)
+            ->where('id', '!=', $barang->id)
+            ->where('status', 'Tersedia')
+            ->take(5)
+            ->get();
 
-    $sudahDiajukan = false;
+        $requestStatus = null;
 
-    if (Auth::check()) {
-        $sudahDiajukan = \App\Models\RequestBarang::where('barang_donasi_id', $barang->id)
-            ->where('penerima_id', Auth::id())
-            ->exists();
+        if (Auth::check()) {
+            $existing = \App\Models\RequestBarang::where('barang_donasi_id', $barang->id)
+                ->where('penerima_id', Auth::id())
+                ->first();
+
+            $requestStatus = $existing->status ?? null;
+        }
+
+        return view('barang.show', compact('barang', 'barangSerupa', 'requestStatus'));
     }
 
-    return view('barang.show', compact('barang', 'barangSerupa', 'sudahDiajukan'));
-}
-
-
+    /**
+     * Hapus barang
+     */
     public function destroy(BarangDonasi $barang)
     {
         if (Auth::id() !== $barang->donatur_id) {
@@ -191,6 +175,7 @@ class BarangDonasiController extends Controller
 
         $barang->delete();
 
-        return redirect()->route('profile.show', Auth::user()->username)->with('success', 'Donasi berhasil dihapus.');
+        return redirect()->route('profile.show', Auth::user()->username)
+            ->with('success', 'Donasi berhasil dihapus.');
     }
 }

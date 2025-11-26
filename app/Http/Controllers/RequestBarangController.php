@@ -16,21 +16,32 @@ class RequestBarangController extends Controller
     {
         $userId = Auth::id();
 
+        // Cek pemilik barang
         if ($barang->donatur_id == $userId) {
             return back()->with('error', 'Anda tidak dapat meminta barang Anda sendiri.');
         }
 
+        // Cek status barang
         if ($barang->status !== 'Tersedia') {
             return back()->with('error', 'Barang ini sudah tidak tersedia.');
         }
 
-        if (RequestBarang::where('barang_donasi_id', $barang->id)
-            ->where('penerima_id', $userId)
-            ->exists()) 
-        {
+        // Cek request sebelumnya
+        $existingRequest = RequestBarang::where('barang_donasi_id', $barang->id)
+                            ->where('penerima_id', $userId)
+                            ->first();
+
+        // Jika sudah request & status Ditolak -> hapus dan izinkan request ulang
+        if ($existingRequest && $existingRequest->status === 'Ditolak') {
+            $existingRequest->delete();
+        }
+
+        // Jika sudah request & status masih aktif (Diajukan / Disetujui)
+        if ($existingRequest && $existingRequest->status !== 'Ditolak') {
             return back()->with('error', 'Anda sudah mengajukan permintaan untuk barang ini.');
         }
 
+        // Buat request baru
         RequestBarang::create([
             'penerima_id' => $userId,
             'barang_donasi_id' => $barang->id,
@@ -42,7 +53,7 @@ class RequestBarangController extends Controller
     }
 
     /**
-     * Kelola Pengajuan
+     * Kelola Pengajuan Pendonasi
      */
     public function index()
     {
@@ -63,7 +74,7 @@ class RequestBarangController extends Controller
     }
 
     /**
-     * Update status Pengajuan
+     * Update status pengajuan
      */
     public function updateStatus($id, $status)
     {
@@ -73,18 +84,22 @@ class RequestBarangController extends Controller
             return back()->with('error', 'Status tidak valid.');
         }
 
+        // Pastikan pemilik barang yang mengubah status
         if ($requestBarang->barangDonasi->donatur_id !== Auth::id()) {
             return back()->with('error', 'Akses ditolak.');
         }
 
+        // Update status request
         $requestBarang->status = $status;
         $requestBarang->save();
 
+        // Jika disetujui
         if ($status === 'Disetujui') {
             $barang = $requestBarang->barangDonasi;
             $barang->status = 'Dipesan';
             $barang->save();
 
+            // Otomatis tolak request lainnya
             RequestBarang::where('barang_donasi_id', $requestBarang->barang_donasi_id)
                 ->where('id', '!=', $id)
                 ->update(['status' => 'Ditolak']);

@@ -8,7 +8,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
 
-        {{-- ================= Gambar Utama + Thumbnail ================= --}}
+        {{-- ================= Gambar Utama ================= --}}
         <div class="flex flex-col items-center">
             <img id="mainImage"
                 src="{{ $barang->foto_barang_utama ? asset('uploads/barang/' . $barang->foto_barang_utama) : 'https://placehold.co/800x600?text=No+Image' }}"
@@ -23,7 +23,6 @@
                 <div class="flex gap-3 mt-4 overflow-x-auto pb-1">
                     <img src="{{ asset('uploads/barang/' . $barang->foto_barang_utama) }}"
                          class="thumb w-24 h-24 rounded-xl border-2 border-blue-600 cursor-pointer object-cover">
-
                     @foreach($fotoLain as $foto)
                         <img src="{{ asset('uploads/barang/' . $foto) }}"
                              class="thumb w-24 h-24 rounded-xl border cursor-pointer object-cover">
@@ -44,7 +43,7 @@
                 </span>
 
                 <h3 class="text-lg font-semibold mt-5">Deskripsi</h3>
-                <p class="text-gray-700 leading-relaxed">{{ $barang->deskripsi }}</p>
+                <p class="text-gray-700">{{ $barang->deskripsi }}</p>
 
                 <p class="text-sm text-gray-600 mt-3">Kondisi:
                     <span class="font-semibold text-gray-900">{{ $barang->kondisi }}</span>
@@ -83,10 +82,9 @@
             <div class="bg-white rounded-2xl shadow-md p-6">
 
                 @if(Auth::check())
+                    {{-- Jika pendonasi --}}
                     @if(Auth::id() == $barang->donatur_id)
-                        {{-- Pendonasi --}}
                         <p class="text-center text-gray-700 mb-4">Ini adalah donasi Anda.</p>
-
                         <form action="{{ route('barang.destroy', $barang->id) }}" method="POST"
                               onsubmit="return confirm('Apakah Anda yakin ingin menghapus donasi ini?');">
                             @csrf @method('DELETE')
@@ -96,39 +94,50 @@
                             </button>
                         </form>
 
+                    {{-- Jika penerima --}}
                     @else
-                        {{-- Penerima --}}
-                        @if($sudahDiajukan)
+                        {{-- Status request --}}
+                        @if($requestStatus === 'Diajukan')
                             <div class="bg-yellow-100 text-yellow-800 p-4 rounded-xl text-center font-semibold mb-3">
                                 Permintaan sudah diajukan. Menunggu konfirmasi pendonasi.
                             </div>
 
-                            <a href="{{ route('chat.show', $barang->donatur->id) }}"
-                               class="block text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl">
-                                Hubungi Pendonasi
-                            </a>
+                        @elseif($requestStatus === 'Ditolak')
+                            <div class="bg-red-100 text-red-700 p-4 rounded-xl text-center font-semibold mb-3">
+                                Permintaan sebelumnya ditolak. Ajukan kembali jika masih membutuhkan.
+                            </div>
 
-                        @elseif($barang->status === 'Tersedia')
                             <form action="{{ route('request.store', $barang->id) }}" method="POST">
                                 @csrf
                                 <button type="submit"
-                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2">
-                                    Ajukan Penerimaan Barang
+                                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl">
+                                    Ajukan Ulang
                                 </button>
                             </form>
 
-                            <a href="{{ route('chat.show', $barang->donatur->id) }}"
-                                class="block text-center mt-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl">
-                                Hubungi Pendonasi
-                            </a>
-
-                        @else
+                        @elseif($barang->status !== 'Tersedia')
                             <div class="bg-yellow-100 text-yellow-800 p-4 rounded-xl text-center font-semibold">
                                 Barang ini telah diterima.
                             </div>
+
+                        @else
+                            <form action="{{ route('request.store', $barang->id) }}" method="POST">
+                                @csrf
+                                <button type="submit"
+                                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl">
+                                    Ajukan Penerimaan Barang
+                                </button>
+                            </form>
                         @endif
+
+                        {{-- Tombol Hubungi Pendonasi --}}
+                        <a href="{{ route('chat.show', $barang->donatur->id) }}"
+                           class="block text-center mt-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl">
+                            Hubungi Pendonasi
+                        </a>
                     @endif
 
+                {{-- Belum login --}}
                 @else
                     <a href="{{ route('login') }}"
                        class="block text-center w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl">
@@ -143,7 +152,6 @@
 </main>
 
 
-{{-- ========== SCRIPT GANTI FOTO THUMBNAIL ========== --}}
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const mainImg = document.getElementById("mainImage");
