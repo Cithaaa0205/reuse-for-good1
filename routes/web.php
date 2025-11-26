@@ -37,11 +37,11 @@ Route::middleware('auth')->group(function () {
     // ==============================
     Route::prefix('barang')->name('barang.')->group(function () {
         Route::get('/', [BarangDonasiController::class, 'index'])->name('index');
-        Route::get('create', [BarangDonasiController::class, 'create'])->name('create'); 
+        Route::get('create', [BarangDonasiController::class, 'create'])->name('create');
         Route::post('/', [BarangDonasiController::class, 'store'])->name('store');
 
-        // Perbaikan Route Model Binding
-        Route::get('{barang}', [BarangDonasiController::class, 'show'])->name('show'); 
+        // PERBAIKAN ROUTE MODEL BINDING
+        Route::get('{barang}', [BarangDonasiController::class, 'show'])->name('show');
         Route::delete('{barang}', [BarangDonasiController::class, 'destroy'])->name('destroy');
     });
 
@@ -53,7 +53,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // FAVORIT
-    Route::post('favorite/{barangDonasi}', [FavoriteController::class, 'toggle'])
+    Route::post('favorite/{barang}', [FavoriteController::class, 'toggle'])
         ->name('favorite.toggle');
 
     // CHAT
@@ -68,7 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::get('kelola-pengajuan', [RequestBarangController::class, 'index'])->name('request.manage');
     Route::patch('request/{requestBarang}/{status}', [RequestBarangController::class, 'updateStatus'])->name('request.updateStatus');
 
-    // SIMPAN LOKASI USER
+    // LOKASI USER
     Route::post('/save-location', function (\Illuminate\Http\Request $request) {
         auth()->user()->update([
             'latitude' => $request->latitude,

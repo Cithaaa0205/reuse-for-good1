@@ -59,26 +59,24 @@
 
 
             {{-- ================= INFO DONATUR ================= --}}
- <div class="bg-white rounded-2xl shadow-md p-6">
-    <a href="{{ $barang->donatur ? route('profile.show', $barang->donatur->username) : '#' }}"
-       class="flex items-center gap-4">
+            <div class="bg-white rounded-2xl shadow-md p-6">
+                <a href="{{ $barang->donatur ? route('profile.show', $barang->donatur->username) : '#' }}"
+                   class="flex items-center gap-4">
 
-        <div class="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
-            {{ strtoupper(substr($barang->donatur->nama_lengkap ?? 'User', 0, 2)) }}
-        </div>
+                    <div class="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                        {{ strtoupper(substr($barang->donatur->nama_lengkap ?? 'User', 0, 2)) }}
+                    </div>
 
-        <div>
-            <h4 class="text-lg font-semibold">
-                {{ $barang->donatur->nama_lengkap ?? 'Pengguna Tidak Diketahui' }}
-            </h4>
-            <p class="text-sm text-gray-600">
-                {{ $barang->donatur ? $barang->donatur->barangDonasis->count() : 0 }} Donasi
-            </p>
-        </div>
-
-    </a>
-</div>
-
+                    <div>
+                        <h4 class="text-lg font-semibold">
+                            {{ $barang->donatur->nama_lengkap ?? 'Pengguna Tidak Diketahui' }}
+                        </h4>
+                        <p class="text-sm text-gray-600">
+                            {{ $barang->donatur ? $barang->donatur->barangDonasis->count() : 0 }} Donasi
+                        </p>
+                    </div>
+                </a>
+            </div>
 
 
             {{-- ================= TOMBOL AKSI ================= --}}
@@ -100,7 +98,17 @@
 
                     @else
                         {{-- Penerima --}}
-                        @if($barang->status === 'Tersedia')
+                        @if($sudahDiajukan)
+                            <div class="bg-yellow-100 text-yellow-800 p-4 rounded-xl text-center font-semibold mb-3">
+                                Permintaan sudah diajukan. Menunggu konfirmasi pendonasi.
+                            </div>
+
+                            <a href="{{ route('chat.show', $barang->donatur->id) }}"
+                               class="block text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl">
+                                Hubungi Pendonasi
+                            </a>
+
+                        @elseif($barang->status === 'Tersedia')
                             <form action="{{ route('request.store', $barang->id) }}" method="POST">
                                 @csrf
                                 <button type="submit"
@@ -110,7 +118,7 @@
                             </form>
 
                             <a href="{{ route('chat.show', $barang->donatur->id) }}"
-                               class="block text-center mt-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl">
+                                class="block text-center mt-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl">
                                 Hubungi Pendonasi
                             </a>
 
