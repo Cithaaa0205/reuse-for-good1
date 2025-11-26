@@ -9,20 +9,19 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('barang_donasis', function (Blueprint $table) {
-            //
-        });
-    }
+public function up(): void
+{
+    Schema::table('barang_donasis', function (Blueprint $table) {
+        $table->decimal('latitude', 10, 7)->nullable()->after('kabupaten');
+        $table->decimal('longitude', 10, 7)->nullable()->after('latitude');
+    });
+}
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::table('barang_donasis', function (Blueprint $table) {
-            //
-        });
-    }
+public function down(): void
+{
+    Schema::table('barang_donasis', function (Blueprint $table) {
+        $table->dropColumn(['latitude', 'longitude']);
+    });
+}
+
 };
