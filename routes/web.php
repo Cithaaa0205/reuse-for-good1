@@ -53,8 +53,8 @@ Route::middleware('auth')->group(function () {
     });
 
     // FAVORIT
-    Route::post('favorite/{barang}', [FavoriteController::class, 'toggle'])
-        ->name('favorite.toggle');
+    Route::post('favorite/{id}', [FavoriteController::class, 'toggle'])->name('favorite.toggle');
+
 
     // CHAT
     Route::prefix('chat')->name('chat.')->group(function () {

@@ -6,16 +6,15 @@ use App\Models\Favorite;
 use App\Models\BarangDonasi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Routing\Controller;
 
 class FavoriteController extends Controller
 {
     /**
      * Toggle Favorite:
-     * - Kalau belum ada → buat record baru
-     * - Kalau sudah ada → hapus (unfavorite)
+     * - Jika belum ada -> buat record baru
+     * - Jika sudah ada -> hapus
      */
-    public function toggle(BarangDonasi $barangDonasi)
+    public function toggle($barangId)
     {
         $userId = Auth::id();
 
@@ -23,26 +22,31 @@ class FavoriteController extends Controller
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        // Logging sementara untuk debug: siapa klik like dan barang apa
-        Log::info('Favorite toggle called', ['user_id' => $userId, 'barang_id' => $barangDonasi->id]);
+        // Pastikan barang valid
+        $barang = BarangDonasi::findOrFail($barangId);
 
+        // Logging debugging
+        Log::info('Favorite toggle clicked', ['user_id' => $userId, 'barang_id' => $barang->id]);
+
+        // Cek apakah sudah jadi favorit
         $existingFavorite = Favorite::where('user_id', $userId)
-            ->where('barang_donasi_id', $barangDonasi->id)
+            ->where('barang_donasi_id', $barang->id)
             ->first();
 
         if ($existingFavorite) {
             // Unfavorite
             $existingFavorite->delete();
-            Log::info('Favorite removed', ['user_id' => $userId, 'barang_id' => $barangDonasi->id]);
+            Log::info('Favorite removed', ['user_id' => $userId, 'barang_id' => $barang->id]);
             return back()->with('success', 'Barang dihapus dari favorit.');
         }
 
-        // Favorite baru
+        // Simpan favorit baru
         Favorite::create([
-            'user_id'          => $userId,
-            'barang_donasi_id' => $barangDonasi->id,
+            'user_id' => $userId,
+            'barang_donasi_id' => $barang->id
         ]);
-        Log::info('Favorite created', ['user_id' => $userId, 'barang_id' => $barangDonasi->id]);
+
+        Log::info('Favorite added', ['user_id' => $userId, 'barang_id' => $barang->id]);
 
         return back()->with('success', 'Barang ditambahkan ke favorit!');
     }
