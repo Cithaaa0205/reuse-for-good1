@@ -11,7 +11,9 @@ use App\Http\Controllers\RequestBarangController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LocationController;
 use App\Http\Middleware\AdminMiddleware;
-use App\Http\Middleware\EnsureUserHasLocation;   // ← TAMBAHAN INI
+use App\Http\Middleware\EnsureUserHasLocation;
+// 👇 TAMBAHAN PENTING: Import Controller Lupa Password
+use App\Http\Controllers\ForgotPasswordController; 
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +28,21 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::get('register', [AuthController::class, 'showRegistrationForm'])->name('register');
     Route::post('register', [AuthController::class, 'register']);
+
+    // ==========================================
+    // 👇 FITUR LUPA PASSWORD (TAMBAHAN BARU)
+    // ==========================================
+    // 1. Form isi email
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    
+    // 2. Proses kirim link ke email
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    
+    // 3. Form input password baru (setelah klik link di email)
+    Route::get('reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+    
+    // 4. Proses update password baru ke database
+    Route::post('reset-password', [ForgotPasswordController::class, 'reset'])->name('password.update');
 });
 
 // Rute untuk yang sudah login
@@ -42,8 +59,7 @@ Route::middleware('auth')->group(function () {
     // ==============================
     // ROUTE YANG BUTUH LOKASI USER
     // ==============================
-    Route::middleware(EnsureUserHasLocation::class)->group(function () {   // ← PAKAI CLASS, BUKAN 'hasLocation'
-
+    Route::middleware(EnsureUserHasLocation::class)->group(function () {
         // Halaman utama & about
         Route::get('home', [PageController::class, 'home'])->name('home');
         Route::get('about', [PageController::class, 'about'])->name('about');
@@ -82,7 +98,7 @@ Route::middleware('auth')->group(function () {
         Route::get('kelola-pengajuan', [RequestBarangController::class, 'index'])->name('request.manage');
         Route::patch('request/{requestBarang}/{status}', [RequestBarangController::class, 'updateStatus'])->name('request.updateStatus');
 
-        // LOKASI USER (simpan latitude/longitude dari geolocation JS)
+        // LOKASI USER
         Route::post('/save-location', function (\Illuminate\Http\Request $request) {
             auth()->user()->update([
                 'latitude'  => $request->latitude,

@@ -45,63 +45,58 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        // VALIDASI
-        // Lokasi dibuat OPSIONAL di halaman ini agar kamu bisa upload foto saja.
+        // ============================
+        // 1. VALIDASI DATA PROFIL
+        // ============================
         $validated = $request->validate([
             'nama_lengkap'   => 'required|string|max:255',
             'username'       => [
                 'required',
                 'string',
                 'max:255',
-                // HAPUS alpha_dash supaya boleh mengandung @ dan .
                 Rule::unique('users')->ignore($user->id),
             ],
             'nomor_telepon'  => 'required|string|max:15',
             'deskripsi'      => 'nullable|string|max:500',
             'foto_profil'    => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'password'       => 'nullable|string|min:8|confirmed',
-
-            // Lokasi: opsional di edit profil
+            
+            // Lokasi: opsional
             'provinsi'       => 'nullable|string|max:100',
             'kabupaten'      => 'nullable|string|max:100',
+            
+            // NOTE: Validasi password dipisah di bawah agar lebih aman
         ]);
 
         // ============================
-        // Upload foto profil (jika ada)
+        // 2. Upload foto profil
         // ============================
         if ($request->hasFile('foto_profil')) {
             $path = public_path('uploads/avatars/');
             $file = $request->file('foto_profil');
 
-            // Pastikan folder ada
             if (!is_dir($path)) {
                 mkdir($path, 0755, true);
             }
 
             $nama_file = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
 
-            // Hapus foto lama jika ada
             if ($user->foto_profil) {
                 File::delete($path . $user->foto_profil);
             }
 
-            // Simpan yang baru
             $file->move($path, $nama_file);
             $user->foto_profil = $nama_file;
         }
 
         // ============================
-        // Data dasar
+        // 3. Update Data Dasar
         // ============================
         $user->nama_lengkap  = $validated['nama_lengkap'];
         $user->username      = $validated['username'];
         $user->nomor_telepon = $validated['nomor_telepon'];
         $user->deskripsi     = $validated['deskripsi'] ?? $user->deskripsi;
 
-        // ============================
-        // Lokasi (opsional)
-        // hanya di-update kalau ada isi
-        // ============================
+        // Lokasi (update hanya jika diisi)
         if (!empty($validated['provinsi'])) {
             $user->provinsi = $validated['provinsi'];
         }
@@ -111,10 +106,33 @@ class ProfileController extends Controller
         }
 
         // ============================
-        // Password (opsional)
+        // 4. LOGIKA GANTI PASSWORD
         // ============================
-        if ($request->filled('password')) {
-            $user->password = Hash::make($validated['password']);
+        // Cek jika user mengisi salah satu field password
+        if ($request->filled('current_password') || $request->filled('password')) {
+            
+            // A. Wajibkan mengisi password lama
+            $request->validate([
+                'current_password' => 'required',
+            ], [
+                'current_password.required' => 'Untuk mengganti password, harap masukkan password lama Anda.'
+            ]);
+
+            // B. Cek kesesuaian Password Lama dengan Database
+            if (!Hash::check($request->current_password, $user->password)) {
+                return back()->withErrors(['current_password' => 'Password lama yang Anda masukkan salah.']);
+            }
+
+            // C. Validasi Password Baru
+            $request->validate([
+                'password' => 'required|string|min:8|confirmed',
+            ], [
+                'password.min'       => 'Password baru minimal 8 karakter.',
+                'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
+            ]);
+
+            // D. Simpan Password Baru (di-hash)
+            $user->password = Hash::make($request->password);
         }
 
         $user->save();

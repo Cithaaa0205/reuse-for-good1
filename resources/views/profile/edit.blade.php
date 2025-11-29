@@ -24,7 +24,22 @@
         </div>
     </section>
 
-    {{-- Alert error --}}
+    {{-- [FITUR BARU] REMINDER GANTI PASSWORD --}}
+    {{-- Kita tampilkan alert ini agar user ingat untuk ganti password acak mereka --}}
+    <div class="flex items-start gap-3 p-4 rounded-2xl bg-blue-50 border border-blue-100 text-blue-800">
+        <div class="mt-0.5 p-1.5 bg-blue-100 rounded-full text-blue-600">
+            <i data-lucide="key-round" class="w-4 h-4"></i>
+        </div>
+        <div>
+            <h3 class="text-sm font-bold">Tips Keamanan Akun</h3>
+            <p class="text-xs mt-1 text-blue-700/80 leading-relaxed">
+                Jika kamu baru saja melakukan <b>Reset Password</b> dan masuk menggunakan password acak, 
+                sangat disarankan untuk segera menggantinya dengan password baru yang mudah kamu ingat di kolom bawah halaman ini.
+            </p>
+        </div>
+    </div>
+
+    {{-- Alert error global --}}
     @if ($errors->any())
         <div class="flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
             <i data-lucide="alert-triangle" class="w-4 h-4 mt-0.5"></i>
@@ -36,6 +51,14 @@
                     @endforeach
                 </ul>
             </div>
+        </div>
+    @endif
+
+    {{-- Alert Success --}}
+    @if (session('success'))
+        <div class="flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <i data-lucide="check-circle-2" class="w-4 h-4 mt-0.5"></i>
+            <p class="font-medium">{{ session('success') }}</p>
         </div>
     @endif
 
@@ -137,12 +160,14 @@
                     >
                 </div>
 
-                {{-- Provinsi (sekarang opsional di edit) --}}
+                {{-- Provinsi --}}
                 <div class="space-y-1.5">
                     <label class="text-xs font-medium text-slate-700">
                         Provinsi <span class="text-[10px] text-slate-400">(opsional di sini)</span>
                     </label>
+                    {{-- Tambahkan data-selected untuk menghindari error Blade --}}
                     <select id="provinsi" name="provinsi"
+                            data-selected="{{ old('provinsi', $user->provinsi) }}"
                             class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm text-slate-800
                                    bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2
                                    focus:ring-blue-200 focus:border-blue-400 transition">
@@ -155,12 +180,14 @@
                     </select>
                 </div>
 
-                {{-- Kabupaten (opsional di edit) --}}
+                {{-- Kabupaten --}}
                 <div class="space-y-1.5 sm:col-span-2">
                     <label class="text-xs font-medium text-slate-700">
                         Kabupaten/Kota <span class="text-[10px] text-slate-400">(opsional di sini)</span>
                     </label>
+                    {{-- Tambahkan data-selected untuk menghindari error Blade --}}
                     <select id="kabupaten" name="kabupaten"
+                            data-selected="{{ old('kabupaten', $user->kabupaten) }}"
                             class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm text-slate-800
                                    bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2
                                    focus:ring-blue-200 focus:border-blue-400 transition">
@@ -201,7 +228,26 @@
                 </span>
             </div>
 
+            {{-- 1. PASSWORD LAMA --}}
+            <div class="space-y-1.5">
+                <label for="current_password" class="text-xs font-medium text-slate-700">
+                    Password Lama
+                </label>
+                <input
+                    type="password"
+                    id="current_password"
+                    name="current_password"
+                    class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm text-slate-800
+                           bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                    placeholder="Masukkan password saat ini (untuk verifikasi)"
+                >
+                @error('current_password')
+                    <p class="text-[11px] text-red-500 mt-0.5">{{ $message }}</p>
+                @enderror
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {{-- 2. PASSWORD BARU --}}
                 <div class="space-y-1.5">
                     <label for="password" class="text-xs font-medium text-slate-700">
                         Password Baru
@@ -214,8 +260,12 @@
                                bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                         placeholder="Minimal 8 karakter"
                     >
+                    @error('password')
+                        <p class="text-[11px] text-red-500 mt-0.5">{{ $message }}</p>
+                    @enderror
                 </div>
 
+                {{-- 3. KONFIRMASI PASSWORD BARU --}}
                 <div class="space-y-1.5">
                     <label for="password_confirmation" class="text-xs font-medium text-slate-700">
                         Konfirmasi Password Baru
@@ -284,8 +334,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const provinsiSelect  = document.getElementById('provinsi');
     const kabupatenSelect = document.getElementById('kabupaten');
 
-    const initialProvinsi  = @json(old('provinsi', $user->provinsi));
-    const initialKabupaten = @json(old('kabupaten', $user->kabupaten));
+    // MENGAMBIL DATA DARI ATRIBUT HTML (Saya sudah hapus tulisan 'at json' dari sini)
+    const initialProvinsi  = provinsiSelect.getAttribute('data-selected');
+    const initialKabupaten = kabupatenSelect.getAttribute('data-selected');
 
     function populateKabupaten(provinsi, selectedKabupaten) {
         kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';

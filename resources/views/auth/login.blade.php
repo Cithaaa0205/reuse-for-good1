@@ -17,7 +17,6 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            /* Background lembut, sedikit glassmorphism feel */
             background:
                 radial-gradient(circle at top, rgba(191, 219, 254, 0.9), transparent 55%),
                 radial-gradient(circle at bottom, rgba(167, 243, 208, 0.7), transparent 55%),
@@ -30,7 +29,7 @@
     <div class="w-full max-w-5xl mx-auto">
         <div class="grid grid-cols-1 md:grid-cols-2 bg-white/90 backdrop-blur-xl rounded-3xl shadow-[0_25px_60px_rgba(15,23,42,0.15)] border border-slate-100 overflow-hidden">
 
-            {{-- LEFT: Brand / Highlight (tanpa statistik) --}}
+            {{-- LEFT: Brand / Highlight --}}
             <div class="hidden md:flex flex-col justify-between bg-gradient-to-br from-blue-600 via-sky-500 to-cyan-400 text-white p-8 relative">
                 <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,_#ffffff,_transparent_60%)]"></div>
 
@@ -97,11 +96,13 @@
             </div>
 
             {{-- RIGHT: Form Login --}}
-            <div class="p-6 sm:p-8 md:p-10 bg-white/95">
+            <div class="p-6 sm:p-8 md:p-10 bg-white/95 relative z-20"> {{-- z-20 added --}}
+                
                 {{-- Logo mobile --}}
                 <div class="md:hidden flex flex-col items-center mb-6">
                     <div class="bg-white p-3 rounded-2xl shadow-md mb-3 border border-slate-100">
-                        <img src="{{ asset('foto/Logo.png') }}" alt="Logo RFG" class="w-14 h-14">
+                        {{-- Pastikan path logo benar, jika error ganti jadi text --}}
+                        <img src="{{ asset('foto/Logo.png') }}" alt="Logo RFG" class="w-14 h-14" onerror="this.style.display='none'">
                     </div>
                     <h2 class="text-xl font-bold text-slate-900">Reuse For Good</h2>
                     <p class="text-xs text-slate-500">Masuk untuk mulai berbagi kebaikan</p>
@@ -113,7 +114,7 @@
                     <p class="text-sm text-slate-500 mt-1">Masuk ke akun kamu dan lanjutkan kebaikanmu ✨</p>
                 </div>
 
-                {{-- Success message setelah registrasi --}}
+                {{-- Success message --}}
                 @if (session('success'))
                     <div class="mb-4 flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-800">
                         <i data-lucide="check-circle-2" class="w-4 h-4 mt-0.5"></i>
@@ -121,7 +122,7 @@
                     </div>
                 @endif
 
-                {{-- Error --}}
+                {{-- Error message --}}
                 @if ($errors->any())
                     <div class="mb-4 flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800">
                         <i data-lucide="alert-triangle" class="w-4 h-4 mt-0.5"></i>
@@ -141,9 +142,7 @@
 
                     {{-- Email --}}
                     <div class="space-y-1.5">
-                        <label for="email" class="block text-xs font-medium text-slate-700">
-                            Email
-                        </label>
+                        <label for="email" class="block text-xs font-medium text-slate-700">Email</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                                 <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i>
@@ -163,9 +162,7 @@
 
                     {{-- Password --}}
                     <div class="space-y-1.5">
-                        <label for="password" class="block text-xs font-medium text-slate-700">
-                            Password
-                        </label>
+                        <label for="password" class="block text-xs font-medium text-slate-700">Password</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                                 <i data-lucide="lock" class="w-4 h-4 text-slate-400"></i>
@@ -182,7 +179,7 @@
                             <button
                                 type="button"
                                 id="togglePassword"
-                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer z-10"
                                 tabindex="-1"
                             >
                                 <i data-lucide="eye" class="w-4 h-4"></i>
@@ -191,11 +188,13 @@
                     </div>
 
                     {{-- Lupa password --}}
-                    <div class="flex items-center justify-between text-xs mt-1 mb-1">
+                    {{-- DIBAGIAN INI YANG KITA PERBAIKI --}}
+                    <div class="flex items-center justify-between text-xs mt-1 mb-1 relative z-10">
                         <span class="text-slate-400">
                             Jaga kerahasiaan akunmu 💙
                         </span>
-                        <a href="#" class="font-medium text-blue-600 hover:text-blue-700">
+                        {{-- Pastikan route 'password.request' sudah ada di web.php --}}
+                        <a href="{{ route('password.request') }}" class="font-medium text-blue-600 hover:text-blue-700 hover:underline cursor-pointer">
                             Lupa password?
                         </a>
                     </div>
@@ -213,7 +212,7 @@
 
                 <p class="text-center text-xs sm:text-sm text-slate-500 mt-6">
                     Belum punya akun?
-                    <a href="{{ route('register') }}" class="font-semibold text-blue-600 hover:text-blue-700">
+                    <a href="{{ route('register') }}" class="font-semibold text-blue-600 hover:text-blue-700 cursor-pointer">
                         Daftar sekarang
                     </a>
                 </p>
@@ -238,6 +237,13 @@
                 togglePasswordBtn.addEventListener('click', () => {
                     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                     passwordInput.setAttribute('type', type);
+                    
+                    // Ganti icon
+                    togglePasswordBtn.innerHTML = type === 'password' 
+                        ? '<i data-lucide="eye" class="w-4 h-4"></i>' 
+                        : '<i data-lucide="eye-off" class="w-4 h-4"></i>';
+                    
+                    if (window.lucide) lucide.createIcons();
                 });
             }
         });
