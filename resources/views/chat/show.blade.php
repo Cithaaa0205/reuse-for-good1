@@ -8,7 +8,7 @@
 @php
     use Illuminate\Support\Str;
 
-    // Cari pesan terakhir dari lawan bicara (bukan dari saya)
+    // Cari pesan terakhir dari lawan bicara
     $lastIncoming = $messages
         ->where('sender_id', '!=', Auth::id())
         ->last();
@@ -18,7 +18,6 @@
     $smartTypeIcon   = 'sparkles';
 
     if (!$lastIncoming) {
-        // Belum ada pesan dari lawan → fokus ke sapaan awal
         $smartTypeLabel = 'Sapaan awal';
         $smartReplies = [
             'Halo kak, saya tertarik dengan barang yang kakak donasikan 🙌',
@@ -28,60 +27,54 @@
     } else {
         $text = Str::lower($lastIncoming->message ?? '');
 
-        // ====== DETEKSI JENIS PESAN ======
-        if (Str::contains($text, ['kapan', 'jam', 'hari apa', 'hari apa ya', 'jadwal', 'besok', 'lusa', 'hari ini', 'datang kapan'])) {
-            // Pertanyaan / obrolan soal JADWAL
-            $smartTypeLabel = 'Penjadwalan pengambilan';
+        // LOGIKA SMART REPLY
+        if (Str::contains($text, ['kapan', 'jam', 'hari apa', 'jadwal', 'besok', 'lusa'])) {
+            $smartTypeLabel = 'Penjadwalan';
             $smartTypeIcon  = 'calendar-clock';
             $smartReplies = [
                 'Saya bisa datang besok, kira-kira jam berapa yang cocok kak? 😊',
-                'Hari apa saja biasanya kakak tersedia untuk pengambilan?',
-                'Kalau hari ini atau besok sore, apakah boleh ambil barangnya kak?'
+                'Hari apa saja biasanya kakak tersedia?',
+                'Kalau hari ini atau besok sore, apakah boleh?'
             ];
-        } elseif (Str::contains($text, ['dimana', 'di mana', 'lokasi', 'alamat', 'maps', 'map', 'shareloc', 'share loc', 'pin lokasi'])) {
-            // Pertanyaan / obrolan soal LOKASI
-            $smartTypeLabel = 'Detail lokasi';
+        } elseif (Str::contains($text, ['dimana', 'lokasi', 'alamat', 'maps', 'shareloc'])) {
+            $smartTypeLabel = 'Lokasi';
             $smartTypeIcon  = 'map-pin';
             $smartReplies = [
                 'Boleh minta alamat lengkap atau pin lokasi Google Maps-nya kak? 🙏',
-                'Apakah lokasinya bisa dijangkau dengan kendaraan umum kak?',
-                'Kalau boleh, kirim share location supaya saya tidak tersesat kak 😄'
+                'Apakah lokasinya bisa dijangkau kendaraan umum?',
+                'Kalau boleh, kirim share location supaya saya tidak tersesat 😄'
             ];
-        } elseif (Str::contains($text, ['masih ada', 'masih tersedia', 'ready', 'kosong', 'sudah diambil', 'sudah ada yang ambil'])) {
-            // Tentang ketersediaan barang
-            $smartTypeLabel = 'Ketersediaan barang';
+        } elseif (Str::contains($text, ['masih ada', 'tersedia', 'ready', 'kosong', 'sudah diambil'])) {
+            $smartTypeLabel = 'Ketersediaan';
             $smartTypeIcon  = 'package-open';
             $smartReplies = [
                 'Kalau masih tersedia, saya ingin sekali ambil barangnya kak 🙌',
-                'Kalau sudah ada yang ambil, tidak apa-apa kak, terima kasih infonya ya 😊',
-                'Kalau belum ada yang ambil, kapan saya boleh datang kak?'
+                'Kalau sudah ada yang ambil, tidak apa-apa kak, terima kasih infonya 😊',
+                'Kapan saya boleh datang untuk ambil kak?'
             ];
-        } elseif (Str::contains($text, ['terima kasih', 'makasih', 'matur nuwun', 'thank you', 'thanks'])) {
-            // Ucapan terima kasih
-            $smartTypeLabel = 'Ucapan balasan';
+        } elseif (Str::contains($text, ['terima kasih', 'makasih', 'thanks'])) {
+            $smartTypeLabel = 'Balasan';
             $smartTypeIcon  = 'heart-handshake';
             $smartReplies = [
-                'Sama-sama kak, terima kasih juga sudah bersedia berdonasi 🙏',
-                'Terima kasih kembali kak, semoga jadi berkah untuk kita semua 🤍',
-                'Sama-sama kak, semoga barangnya bermanfaat ya 😊'
+                'Sama-sama kak, terima kasih juga sudah berdonasi 🙏',
+                'Terima kasih kembali kak, semoga berkah 🤍',
+                'Sama-sama, semoga barangnya bermanfaat 😊'
             ];
-        } elseif (Str::contains($text, ['foto', 'gambar', 'dokumentasi', 'kondisi', 'real pict', 'real pictnya'])) {
-            // Minta / bahas foto barang
-            $smartTypeLabel = 'Permintaan foto';
+        } elseif (Str::contains($text, ['foto', 'gambar', 'kondisi', 'real pict'])) {
+            $smartTypeLabel = 'Foto';
             $smartTypeIcon  = 'image';
             $smartReplies = [
-                'Boleh kirimkan satu atau dua foto terbaru kondisinya kak? 😊',
-                'Kalau ada foto tambahan bagian yang lecet atau rusak, boleh sekalian kak 🙏',
-                'Terima kasih kak, fotonya sangat membantu untuk lihat kondisi barang.'
+                'Boleh kirimkan foto terbaru kondisinya kak? 😊',
+                'Kalau ada bagian yang lecet, boleh difotokan sekalian kak 🙏',
+                'Terima kasih kak, fotonya sangat membantu.'
             ];
         } else {
-            // Default: percakapan umum
             $smartTypeLabel = 'Balasan umum';
             $smartTypeIcon  = 'message-circle';
             $smartReplies = [
                 'Baik kak, terima kasih informasinya 🙏',
-                'Siap kak, saya akan menyesuaikan dengan jadwal & ketentuan dari kakak 😊',
-                'Kalau ada hal lain yang perlu saya siapkan, boleh diinformasikan ya kak.'
+                'Siap kak, saya sesuaikan dengan jadwal kakak 😊',
+                'Ada lagi yang perlu saya siapkan kak?'
             ];
         }
     }
@@ -104,8 +97,6 @@
                             {{ strtoupper(substr($otherUser->nama_lengkap, 0, 2)) }}
                         </div>
                     @endif
-
-                    {{-- dot online (dummy) --}}
                     <span class="absolute -bottom-0.5 -right-0.5 inline-flex h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                 </div>
 
@@ -119,7 +110,7 @@
                 </div>
             </div>
 
-            {{-- mini badge --}}
+            {{-- Smart reply badge --}}
             <div class="hidden sm:flex flex-col items-end gap-1">
                 <div class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 text-[11px] text-slate-500">
                     <i data-lucide="sparkles" class="w-3 h-3"></i>
@@ -128,7 +119,7 @@
                 @if($smartTypeLabel)
                     <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-[10px] text-blue-700 border border-blue-100">
                         <i data-lucide="{{ $smartTypeIcon }}" class="w-3 h-3"></i>
-                        <span>Saran untuk: {{ $smartTypeLabel }}</span>
+                        <span>Saran: {{ $smartTypeLabel }}</span>
                     </div>
                 @endif
             </div>
@@ -148,13 +139,31 @@
             @forelse ($messages as $message)
                 @php
                     $isMe = $message->sender_id == Auth::id();
+                    
+                    // --- LOGIKA LINKIFICATION ---
+                    $msgSafe = e($message->message);
+                    $pattern = '/(https?:\/\/[^\s]+)/';
+
+                    if ($isMe) {
+                        $msgFormatted = preg_replace(
+                            $pattern, 
+                            '<a href="$1" target="_blank" rel="noopener noreferrer" class="underline font-bold text-blue-100 hover:text-white break-all inline-flex items-center gap-1"><i data-lucide="external-link" class="w-3 h-3"></i> $1</a>', 
+                            $msgSafe
+                        );
+                    } else {
+                        $msgFormatted = preg_replace(
+                            $pattern, 
+                            '<a href="$1" target="_blank" rel="noopener noreferrer" class="underline font-bold text-blue-600 hover:text-blue-800 break-all inline-flex items-center gap-1"><i data-lucide="external-link" class="w-3 h-3"></i> $1</a>', 
+                            $msgSafe
+                        );
+                    }
                 @endphp
 
                 @if ($isMe)
                     {{-- Pesan saya --}}
                     <div class="flex justify-end">
-                        <div class="max-w-[80%] sm:max-w-[65%] rounded-2xl rounded-br-sm bg-blue-600 text-white px-3.5 py-2.5 shadow-sm">
-                            <p class="whitespace-pre-line break-words">{{ $message->message }}</p>
+                        <div class="max-w-[85%] sm:max-w-[70%] rounded-2xl rounded-br-sm bg-blue-600 text-white px-3.5 py-2.5 shadow-sm">
+                            <div class="whitespace-pre-line break-words">{!! $msgFormatted !!}</div>
                             <span class="block mt-1 text-[10px] text-blue-100 text-right">
                                 {{ $message->created_at->format('H:i') }}
                             </span>
@@ -168,8 +177,8 @@
                                 {{ strtoupper(substr($otherUser->nama_lengkap, 0, 1)) }}
                             </div>
                         </div>
-                        <div class="max-w-[80%] sm:max-w-[65%] rounded-2xl rounded-bl-sm bg-white/95 text-slate-800 px-3.5 py-2.5 shadow-sm border border-slate-100">
-                            <p class="whitespace-pre-line break-words">{{ $message->message }}</p>
+                        <div class="max-w-[85%] sm:max-w-[70%] rounded-2xl rounded-bl-sm bg-white/95 text-slate-800 px-3.5 py-2.5 shadow-sm border border-slate-100">
+                            <div class="whitespace-pre-line break-words">{!! $msgFormatted !!}</div>
                             <span class="block mt-1 text-[10px] text-slate-400 text-right">
                                 {{ $message->created_at->format('H:i') }}
                             </span>
@@ -195,7 +204,7 @@
             {{-- Smart Reply chips --}}
             @if(!empty($smartReplies))
                 <div class="flex items-center gap-2 overflow-x-auto pb-1 mb-2 hide-scrollbar">
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-50 text-[10px] sm:text-[11px] text-slate-500 border border-slate-200">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-50 text-[10px] sm:text-[11px] text-slate-500 border border-slate-200 flex-shrink-0">
                         <i data-lucide="{{ $smartTypeIcon }}" class="w-3 h-3"></i>
                         <span>{{ $smartTypeLabel ?: 'Balasan cepat' }}</span>
                     </span>
@@ -204,7 +213,7 @@
                         <button
                             type="button"
                             class="smart-reply-chip inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-medium
-                                   bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 hover:-translate-y-[1px] transition"
+                                   bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 hover:-translate-y-[1px] transition flex-shrink-0"
                             data-reply="{{ e($reply) }}"
                         >
                             <i data-lucide="zap" class="w-3 h-3"></i>
@@ -222,16 +231,30 @@
                             name="message"
                             id="message-input"
                             rows="1"
-                            class="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50/80 px-3.5 py-2.5 pr-10 text-sm text-slate-800
+                            class="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50/80 px-3.5 py-2.5 pr-20 text-sm text-slate-800
                                    focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                            placeholder="Tulis pesan yang ramah..."
+                            placeholder="Tulis pesan..."
                             autocomplete="off"
                         >{{ old('message') }}</textarea>
-                        <button type="button"
-                                class="absolute right-2.5 bottom-2 inline-flex items-center justify-center h-7 w-7 rounded-full text-slate-400 hover:text-blue-600 transition"
-                                tabindex="-1">
-                            <i data-lucide="smile" class="w-4 h-4"></i>
-                        </button>
+                        
+                        {{-- Group Tombol: Share Loc & Smiley --}}
+                        <div class="absolute right-2 bottom-2 flex items-center gap-1">
+                            {{-- Tombol Share Location --}}
+                            <button type="button" 
+                                    id="btn-share-location"
+                                    class="inline-flex items-center justify-center h-8 w-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition"
+                                    title="Bagikan Lokasi Saya">
+                                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                            </button>
+
+                            {{-- Tombol Smiley / Emoji (SUDAH DI-UPDATE ID-NYA) --}}
+                            <button type="button" 
+                                    id="btn-emoji"
+                                    class="inline-flex items-center justify-center h-8 w-8 rounded-full text-slate-400 hover:text-yellow-500 hover:bg-yellow-50 transition" 
+                                    title="Pilih Emoji">
+                                <i data-lucide="smile" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <button type="submit"
@@ -246,60 +269,157 @@
 </div>
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Auto-scroll ke pesan terakhir
-    const container = document.getElementById('message-container');
-    if (container) {
-        container.scrollTop = container.scrollHeight;
-    }
+{{-- Load Emoji Button Library via CDN --}}
+{{-- Kita menggunakan type="module" agar bisa menggunakan import --}}
+<script type="module">
+    import { EmojiButton } from 'https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.js';
 
-    const input = document.getElementById('message-input');
-    const form  = document.getElementById('chat-form');
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('message-input');
+        const form  = document.getElementById('chat-form');
+        const btnEmoji = document.querySelector('#btn-emoji');
 
-    if (input) {
-        // Auto-resize textarea
-        const autoResize = () => {
-            input.style.height = 'auto';
-            input.style.height = input.scrollHeight + 'px';
-        };
-        autoResize();
-        input.addEventListener('input', autoResize);
-
-        // Kirim pesan dengan Enter (Shift+Enter untuk baris baru)
-        input.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                if (this.value.trim() !== '') {
-                    form.submit();
+        // ==========================================
+        // 1. Logic Emoji Picker
+        // ==========================================
+        if (btnEmoji && input) {
+            const picker = new EmojiButton({
+                position: 'top-end', // Muncul di atas tombol
+                theme: 'auto',       // Sesuai tema browser (dark/light)
+                autoHide: false,     // Biar user bisa pilih banyak emoji sekaligus
+                rows: 4,
+                recentsCount: 10,
+                i18n: {
+                    search: 'Cari emoji...',
+                    categories: {
+                        recents: 'Sering dipakai',
+                        smileys: 'Senyum & Emosi',
+                        people: 'Orang',
+                        animals: 'Hewan',
+                        food: 'Makanan',
+                        activities: 'Aktivitas',
+                        travel: 'Travel',
+                        objects: 'Objek',
+                        symbols: 'Simbol',
+                        flags: 'Bendera'
+                    }
                 }
-            }
+            });
+
+            // Saat emoji dipilih
+            picker.on('emoji', selection => {
+                // Tambahkan emoji ke input
+                const text = input.value;
+                input.value = text + selection.emoji;
+                
+                // Trigger event input supaya textarea auto-resize
+                input.dispatchEvent(new Event('input'));
+                input.focus();
+            });
+
+            // Saat tombol smile diklik
+            btnEmoji.addEventListener('click', () => {
+                picker.togglePicker(btnEmoji);
+            });
+        }
+
+        // ==========================================
+        // 2. Logic Auto Scroll & Resize (Standard)
+        // ==========================================
+        const container = document.getElementById('message-container');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+
+        if (input) {
+            const autoResize = () => {
+                input.style.height = 'auto';
+                input.style.height = input.scrollHeight + 'px';
+            };
+            autoResize();
+            input.addEventListener('input', autoResize);
+
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (this.value.trim() !== '') {
+                        form.submit();
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // 3. Logic Smart Reply
+        // ==========================================
+        const chips = document.querySelectorAll('.smart-reply-chip');
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                if (!input) return;
+                const reply = chip.getAttribute('data-reply') || '';
+                if (!reply) return;
+
+                if (!input.value.trim()) {
+                    input.value = reply;
+                } else {
+                    const trimmed = input.value.replace(/\s+$/, '');
+                    input.value = trimmed + (trimmed.endsWith('\n') ? '' : ' ') + reply;
+                }
+
+                input.focus();
+                input.dispatchEvent(new Event('input'));
+            });
         });
-    }
 
-    // Smart Reply click handler
-    const chips = document.querySelectorAll('.smart-reply-chip');
-    chips.forEach(chip => {
-        chip.addEventListener('click', () => {
-            if (!input) return;
-            const reply = chip.getAttribute('data-reply') || '';
+        // ==========================================
+        // 4. Logic Share Location
+        // ==========================================
+        const btnLocation = document.getElementById('btn-share-location');
+        if (btnLocation && input) {
+            btnLocation.addEventListener('click', () => {
+                if (!navigator.geolocation) {
+                    alert("Browser kakak tidak mendukung fitur lokasi.");
+                    return;
+                }
 
-            if (!reply) return;
+                // Ubah icon loading
+                const originalIcon = btnLocation.innerHTML;
+                btnLocation.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-blue-500"></i>';
+                btnLocation.disabled = true;
+                if(typeof lucide !== 'undefined') lucide.createIcons();
 
-            // Kalau input masih kosong → langsung isi
-            if (!input.value.trim()) {
-                input.value = reply;
-            } else {
-                // Kalau sudah ada teks → tambahkan di belakang dengan spasi
-                const trimmed = input.value.replace(/\s+$/, '');
-                input.value = trimmed + (trimmed.endsWith('\n') ? '' : ' ') + reply;
-            }
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const mapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+                        
+                        const currentText = input.value.trim();
+                        const textToAdd = "Ini lokasi saya kak: " + mapsLink;
+                        
+                        input.value = currentText + (currentText ? '\n' : '') + textToAdd;
+                        input.dispatchEvent(new Event('input'));
+                        input.focus();
 
-            input.focus();
-            input.dispatchEvent(new Event('input')); // trigger auto-resize
-        });
+                        btnLocation.innerHTML = originalIcon;
+                        btnLocation.disabled = false;
+                        if(typeof lucide !== 'undefined') lucide.createIcons();
+                    },
+                    (error) => {
+                        console.error(error);
+                        let errorMsg = "Gagal mengambil lokasi.";
+                        if (error.code === error.PERMISSION_DENIED) {
+                            errorMsg = "Mohon izinkan akses lokasi di browser kakak ya 🙏";
+                        }
+                        alert(errorMsg);
+                        btnLocation.innerHTML = originalIcon;
+                        btnLocation.disabled = false;
+                        if(typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+                );
+            });
+        }
     });
-});
 </script>
 @endpush
 @endsection
