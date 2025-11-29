@@ -73,14 +73,10 @@ public function login(Request $request)
             'nomor_telepon' => $request->nomor_telepon,
             'username' => $request->username,
             'password' => Hash::make($request->password),
-            'role' => 'donatur' // Default role
+            'role' => 'user' // Default role
         ]);
 
-        // === PERUBAHAN DI SINI ===
-        // 1. Hapus login otomatis
-        // Auth::login($user); 
-
-        // 2. Arahkan kembali ke halaman login dengan pesan sukses
+        //  Arahkan kembali ke halaman login dengan pesan sukses
         return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan masuk dengan akun baru Anda.');
         // === AKHIR PERUBAHAN ===
     }
