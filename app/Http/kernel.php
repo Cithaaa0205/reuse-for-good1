@@ -59,5 +59,8 @@ class Kernel extends HttpKernel
 
         // 👉 Alias middleware ADMIN kita
         'admin'            => \App\Http\Middleware\AdminMiddleware::class,
+
+        // 👉 Alias middleware LOKASI (wajib punya lokasi sebelum akses fitur tertentu)
+        'hasLocation'      => \App\Http\Middleware\EnsureUserHasLocation::class,
     ];
 }

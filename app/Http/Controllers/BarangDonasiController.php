@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BarangDonasi;
 use App\Models\Kategori;
+use App\Services\AutoCategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -12,15 +13,37 @@ use Illuminate\Support\Facades\File;
 class BarangDonasiController extends Controller
 {
     /**
+     * Service untuk auto-kategori (OpenAI + rule-based).
+     *
+     * @var \App\Services\AutoCategoryService
+     */
+    protected AutoCategoryService $autoCategory;
+
+    public function __construct(AutoCategoryService $autoCategory)
+    {
+        $this->autoCategory = $autoCategory;
+    }
+
+    /**
      * Menampilkan daftar barang donasi yang tersedia (Etalase).
      */
     public function index(Request $request)
     {
         $kategoris = Kategori::all();
-        $query = BarangDonasi::where('status', 'Tersedia');
+        $query     = BarangDonasi::where('status', 'Tersedia');
 
-        $isSearchActive = $request->filled('search') || $request->filled('kategori');
+        $user = Auth::user();
 
+        // Dipakai di view untuk tahu ini "Rekomendasi" atau "Hasil filter/pencarian"
+        $isSearchActive = $request->filled('search')
+            || $request->filled('kategori')
+            || $request->filled('jarak')
+            || $request->filled('filter_provinsi')
+            || $request->filled('filter_kabupaten');
+
+        // ==========================
+        // FILTER PENCARIAN
+        // ==========================
         if ($request->filled('search')) {
             $keyword = $request->search;
             $query->where(function ($q) use ($keyword) {
@@ -41,35 +64,109 @@ class BarangDonasiController extends Controller
             });
         }
 
-        if (Auth::check() && Auth::user()->latitude && Auth::user()->longitude) {
-            $lat = Auth::user()->latitude;
-            $lng = Auth::user()->longitude;
+        // ==========================
+        // FILTER LOKASI (MODAL FILTER)
+        // ==========================
+        if ($request->filled('filter_provinsi')) {
+            $query->where('provinsi', $request->filter_provinsi);
+        }
+
+        if ($request->filled('filter_kabupaten')) {
+            $query->where('kabupaten', $request->filter_kabupaten);
+        }
+
+        // ==========================
+        // FILTER & URUTKAN BERDASARKAN JARAK (untuk distance di kartu)
+        // ==========================
+        $hasCoordinates = $user && $user->latitude && $user->longitude;
+
+        if ($hasCoordinates) {
+            $lat = $user->latitude;
+            $lng = $user->longitude;
 
             $query->selectRaw("
-                *, (6371 * acos(cos(radians(?)) *
-                cos(radians(latitude)) *
-                cos(radians(longitude) - radians(?)) +
-                sin(radians(?)) *
-                sin(radians(latitude)))) AS distance
+                barang_donasis.*,
+                (6371 * acos(
+                    cos(radians(?)) *
+                    cos(radians(latitude)) *
+                    cos(radians(longitude) - radians(?)) +
+                    sin(radians(?)) *
+                    sin(radians(latitude))
+                )) AS distance
             ", [$lat, $lng, $lat]);
 
             if ($request->filled('jarak')) {
-                $query->having("distance", "<=", $request->jarak)
-                    ->orderBy("distance");
+                $query->having('distance', '<=', $request->jarak)
+                      ->orderBy('distance');
             }
         }
 
-        $barang = $query->latest()->paginate(20);
+        // ==========================
+        // PRIORITAS LOKASI SAAT TIDAK PAKAI FILTER JARAK
+        // ==========================
+        if ($user && !$request->filled('jarak')) {
+            if ($user->kabupaten && $user->provinsi) {
+                $query->orderByRaw("
+                    CASE 
+                        WHEN kabupaten = ? AND provinsi = ? THEN 0
+                        WHEN provinsi = ? THEN 1
+                        ELSE 2
+                    END,
+                    created_at DESC
+                ", [
+                    $user->kabupaten,
+                    $user->provinsi,
+                    $user->provinsi,
+                ]);
+            } elseif ($user->provinsi) {
+                $query->orderByRaw("
+                    CASE 
+                        WHEN provinsi = ? THEN 0
+                        ELSE 1
+                    END,
+                    created_at DESC
+                ", [
+                    $user->provinsi,
+                ]);
+            } else {
+                $query->latest();
+            }
+        }
 
+        // Kalau tidak login atau pakai filter jarak,
+        // dan belum ada order lain → gunakan terbaru.
+        if ((!$user || $request->filled('jarak')) && empty($query->getQuery()->orders)) {
+            $query->latest();
+        }
+
+        $barang = $query->paginate(20);
+
+        // Favorite ids user login
         $favoriteIds = [];
-        if (Auth::check()) {
-            $favoriteIds = Auth::user()
+        if ($user) {
+            $favoriteIds = $user
                 ->favorites()
                 ->pluck('barang_donasis.id')
                 ->toArray();
         }
 
-        return view('barang.index', compact('barang', 'kategoris', 'favoriteIds', 'isSearchActive'));
+        // Label lokasi user untuk tampilan
+        $userLocationLabel = null;
+        if ($user && ($user->kabupaten || $user->provinsi)) {
+            $userLocationLabel = trim(
+                ($user->kabupaten ? $user->kabupaten . ', ' : '') .
+                ($user->provinsi ?? '')
+            );
+        }
+
+        return view('barang.index', [
+            'barang'            => $barang,
+            'kategoris'         => $kategoris,
+            'favoriteIds'       => $favoriteIds,
+            'isSearchActive'    => $isSearchActive,
+            'userLocationLabel' => $userLocationLabel,
+            'hasCoordinates'    => $hasCoordinates,
+        ]);
     }
 
     /**
@@ -86,46 +183,90 @@ class BarangDonasiController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_barang' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
-            'kategori_id' => 'required|exists:kategoris,id',
-            'kondisi' => 'required|string',
-            'provinsi' => 'required|string',
-            'kabupaten' => 'required|string',
-            'foto_barang' => 'required|array',
-            'foto_barang.*' => 'image|mimes:jpeg,png,jpg|max:10240',
-            'catatan_pengambilan' => 'nullable|string',
+        // kategori_id sekarang BOLEH kosong (nullable)
+        $validated = $request->validate([
+            'nama_barang'          => 'required|string|max:255',
+            'deskripsi'            => 'required|string',
+            'kategori_id'          => 'nullable|exists:kategoris,id',
+            'kondisi'              => 'required|string',
+            'provinsi'             => 'required|string',
+            'kabupaten'            => 'required|string',
+            'foto_barang'          => 'nullable|array',
+            'foto_barang.*'        => 'image|mimes:jpeg,png,jpg|max:10240',
+            'catatan_pengambilan'  => 'nullable|string',
         ]);
 
+        // ==========================
+        // AUTO CATEGORY
+        // ==========================
+        $kategoriId = $validated['kategori_id'] ?? null;
+
+        // Kalau user tidak memilih kategori → coba auto
+        if (!$kategoriId) {
+            $kategoriId = $this->autoCategory->guessCategoryId(
+                $validated['nama_barang'],
+                $validated['deskripsi']
+            );
+        }
+
+        // Kalau masih gagal → fallback ke kategori "Lainnya" atau kategori pertama
+        if (!$kategoriId) {
+            $fallback = Kategori::where('nama_kategori', 'like', '%lain%')->first()
+                        ?? Kategori::orderBy('id')->first();
+
+            if ($fallback) {
+                $kategoriId = $fallback->id;
+            }
+        }
+
+        // Kalau benar-benar tidak ada kategori di DB
+        if (!$kategoriId) {
+            return back()
+                ->withErrors([
+                    'kategori_id' => 'Kategori belum tersedia di sistem. Tambahkan minimal satu kategori terlebih dahulu.',
+                ])
+                ->withInput();
+        }
+
+        // ==========================
+        // Upload foto
+        // ==========================
         $fotoUtama = null;
-        $fotoLain = [];
+        $fotoLain  = [];
 
         if ($request->hasFile('foto_barang')) {
             foreach ($request->file('foto_barang') as $index => $file) {
-                $namaFile = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
+                $namaFile = time() . '_' .
+                    Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) .
+                    '.' . $file->getClientOriginalExtension();
+
                 $file->move(public_path('uploads/barang'), $namaFile);
 
-                if ($index === 0) $fotoUtama = $namaFile;
-                else $fotoLain[] = $namaFile;
+                if ($index === 0) {
+                    $fotoUtama = $namaFile;
+                } else {
+                    $fotoLain[] = $namaFile;
+                }
             }
         }
 
         BarangDonasi::create([
-            'donatur_id' => Auth::id(),
-            'kategori_id' => $request->kategori_id,
-            'nama_barang' => $request->nama_barang,
-            'deskripsi' => $request->deskripsi,
-            'kondisi' => $request->kondisi,
-            'provinsi' => $request->provinsi,
-            'kabupaten' => $request->kabupaten,
-            'foto_barang_utama' => $fotoUtama,
+            'donatur_id'          => Auth::id(),
+            'kategori_id'         => $kategoriId,
+            'nama_barang'         => $validated['nama_barang'],
+            'deskripsi'           => $validated['deskripsi'],
+            'kondisi'             => $validated['kondisi'],
+            'provinsi'            => $validated['provinsi'],
+            'kabupaten'           => $validated['kabupaten'],
+            'foto_barang_utama'   => $fotoUtama,
             'foto_barang_lainnya' => json_encode($fotoLain),
-            'catatan_pengambilan' => $request->catatan_pengambilan,
-            'status' => 'Tersedia',
+            'catatan_pengambilan' => $validated['catatan_pengambilan'] ?? null,
+            'status'              => 'Tersedia',
         ]);
 
-        return redirect()->route('home')->with('success', 'Donasi berhasil diposting!');
+        return redirect()
+            ->route('home')
+            ->with('success', 'Donasi berhasil diposting! Kategori sudah diisi secara otomatis oleh sistem.');
     }
 
     /**
@@ -164,18 +305,23 @@ class BarangDonasiController extends Controller
         }
 
         $pathUtama = public_path('uploads/barang/' . $barang->foto_barang_utama);
-        if (File::exists($pathUtama)) File::delete($pathUtama);
+        if ($barang->foto_barang_utama && File::exists($pathUtama)) {
+            File::delete($pathUtama);
+        }
 
         if ($barang->foto_barang_lainnya) {
             foreach (json_decode($barang->foto_barang_lainnya) as $foto) {
                 $path = public_path('uploads/barang/' . $foto);
-                if (File::exists($path)) File::delete($path);
+                if (File::exists($path)) {
+                    File::delete($path);
+                }
             }
         }
 
         $barang->delete();
 
-        return redirect()->route('profile.show', Auth::user()->username)
+        return redirect()
+            ->route('profile.show', Auth::user()->username)
             ->with('success', 'Donasi berhasil dihapus.');
     }
 }

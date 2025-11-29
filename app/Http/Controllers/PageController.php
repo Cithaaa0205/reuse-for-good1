@@ -19,28 +19,85 @@ class PageController extends Controller
 
     public function home()
     {
+        // Statistik global
         $stats = [
             'barang_didonasikan' => BarangDonasi::count(),
-            'barang_diterima' => BarangDonasi::where('status', 'Dipesan')->count(), // jumlah barang sedang diproses
-            'pengguna_aktif' => User::count(),
-            'kota' => BarangDonasi::distinct('kabupaten')->count('kabupaten'), // ganti lokasi ke kabupaten
+            'barang_diterima'    => BarangDonasi::where('status', 'Dipesan')->count(),
+            'pengguna_aktif'     => User::count(),
+            'kota'               => BarangDonasi::distinct('kabupaten')->count('kabupaten'),
         ];
 
-        $barangTerbaru = BarangDonasi::where('status', 'Tersedia')
-            ->latest()
-            ->take(10)
-            ->get();
+        $user = Auth::user();
 
-        // Favorite items
+        // ==== Rekomendasi barang berdasarkan lokasi user ====
+        $barangQuery = BarangDonasi::where('status', 'Tersedia');
+
+        if ($user && ($user->provinsi || $user->kabupaten)) {
+            if ($user->kabupaten && $user->provinsi) {
+                $barangQuery->orderByRaw("
+                    CASE 
+                        WHEN kabupaten = ? AND provinsi = ? THEN 0
+                        WHEN provinsi = ? THEN 1
+                        ELSE 2
+                    END,
+                    created_at DESC
+                ", [
+                    $user->kabupaten,
+                    $user->provinsi,
+                    $user->provinsi,
+                ]);
+            } elseif ($user->provinsi) {
+                $barangQuery->orderByRaw("
+                    CASE 
+                        WHEN provinsi = ? THEN 0
+                        ELSE 1
+                    END,
+                    created_at DESC
+                ", [
+                    $user->provinsi,
+                ]);
+            } else {
+                $barangQuery->orderByRaw("
+                    CASE 
+                        WHEN kabupaten = ? THEN 0
+                        ELSE 1
+                    END,
+                    created_at DESC
+                ", [
+                    $user->kabupaten,
+                ]);
+            }
+        } else {
+            // User belum punya lokasi → pakai terbaru biasa
+            $barangQuery->latest();
+        }
+
+        $barangTerbaru = $barangQuery->take(10)->get();
+
+        // Favorite items untuk user login
         $favoriteIds = [];
-        if (Auth::check()) {
-            $favoriteIds = Auth::user()
+        if ($user) {
+            $favoriteIds = $user
                 ->favorites()
                 ->pluck('barang_donasis.id')
                 ->toArray();
         }
 
-        return view('home', compact('stats', 'barangTerbaru', 'favoriteIds'));
+        // Label lokasi user (bisa dipakai di view)
+        $userLocationLabel = null;
+        if ($user && ($user->kabupaten || $user->provinsi)) {
+            $userLocationLabel = trim(
+                ($user->kabupaten ? $user->kabupaten . ', ' : '') .
+                ($user->provinsi ?? '')
+            );
+        }
+
+        return view('home', [
+            'stats'             => $stats,
+            'barangTerbaru'     => $barangTerbaru,
+            'favoriteIds'       => $favoriteIds,
+            'userLocationLabel' => $userLocationLabel,
+        ]);
     }
 
     public function about()

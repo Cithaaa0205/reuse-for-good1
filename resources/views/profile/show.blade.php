@@ -8,194 +8,309 @@
 @endif
 
 @section('content')
-<div class="max-w-5xl mx-auto">
-    <!-- Card Info Profil -->
-    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg mb-6">
-        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-            <!-- Foto Profil -->
-            @if($user->foto_profil)
-                <img class="h-24 w-24 md:h-32 md:w-32 rounded-full object-cover shadow-md"
-                     src="{{ asset('uploads/avatars/' . $user->foto_profil) }}"
-                     alt="Foto Profil">
-            @else
-                <div class="h-24 w-24 md:h-32 md:w-32 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-5xl shadow-md">
-                    {{ strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $user->nama_lengkap), 0, 2)) }}
+<div class="max-w-5xl mx-auto space-y-6">
+
+    {{-- HEADER PROFIL --}}
+    <section
+        class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white shadow-lg"
+    >
+        {{-- Glow lembut di pojok --}}
+        <div class="absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_top_left,_#ffffff,_transparent_55%)]"></div>
+
+        <div class="relative px-6 sm:px-8 py-6 sm:py-7 flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start">
+            {{-- Avatar --}}
+            <div class="flex flex-col items-center gap-4">
+                @if($user->foto_profil)
+                    <div class="relative">
+                        <div class="absolute inset-0 rounded-full bg-white/20 blur-md"></div>
+                        <img
+                            class="relative h-24 w-24 md:h-28 md:w-28 rounded-full object-cover border-[5px] border-white/60 shadow-lg"
+                            src="{{ asset('uploads/avatars/' . $user->foto_profil) }}"
+                            alt="Foto Profil"
+                        >
+                    </div>
+                @else
+                    <div class="relative">
+                        <div class="absolute inset-0 rounded-full bg-white/15 blur-md"></div>
+                        <div
+                            class="relative h-24 w-24 md:h-28 md:w-28 rounded-full bg-blue-500/80 text-white flex items-center justify-center font-bold text-3xl md:text-4xl border-[5px] border-white/60 shadow-lg"
+                        >
+                            {{ strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $user->nama_lengkap), 0, 2)) }}
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Badge role --}}
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 text-[11px] font-semibold tracking-wide text-blue-700 shadow-sm">
+                    <i data-lucide="gift" class="w-3 h-3"></i>
+                    Donatur & Penerima
+                </span>
+            </div>
+
+            {{-- Info utama --}}
+            <div class="flex-1 w-full space-y-3">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                    <div class="space-y-1 text-center md:text-left">
+                        <h1 class="text-2xl sm:text-3xl font-extrabold leading-tight">
+                            {{ $user->nama_lengkap }}
+                        </h1>
+                        <p class="text-xs sm:text-sm text-blue-50/95">
+                            @<span>{{ $user->username }}</span>
+                            @if($user->email)
+                                • {{ $user->email }}
+                            @endif
+                            • Bergabung {{ $user->created_at->isoFormat('MMMM YYYY') }}
+                        </p>
+                    </div>
+
+                    {{-- Tombol aksi --}}
+                    <div class="flex flex-wrap justify-center md:justify-end gap-2">
+                        @auth
+                            @if(Auth::id() == $user->id)
+                                <a href="{{ route('profile.edit') }}"
+                                   class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold bg-white text-blue-700 shadow-md hover:bg-blue-50 transition">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                    Edit Profil
+                                </a>
+                            @else
+                                <a href="{{ route('chat.show', $user->id) }}"
+                                   class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold bg-white/95 text-blue-700 shadow-md hover:bg-white transition">
+                                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                    Kirim Pesan
+                                </a>
+                            @endif
+                        @endauth
+                    </div>
                 </div>
-            @endif
-            
-            <!-- Info Teks -->
-            <div class="flex-1 text-center sm:text-left">
-                <div class="flex flex-col sm:flex-row justify-between items-center mb-2">
-                    <h1 class="text-3xl font-bold text-gray-900">{{ $user->nama_lengkap }}</h1>
+
+                {{-- Chip statistik di atas kartu putih transparan biar nggak “nyatu” sama biru --}}
+                <div class="bg-white/15 rounded-2xl px-3 py-3 flex flex-wrap justify-center md:justify-start gap-3">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-slate-700 border border-white/80 shadow-sm text-xs sm:text-sm">
+                        <i data-lucide="package" class="w-4 h-4 text-blue-500"></i>
+                        <span><span class="font-semibold">{{ $barangDonasi->count() }}</span> barang didonasikan</span>
+                    </div>
+
                     @if(Auth::check() && Auth::id() == $user->id)
-                        <a href="{{ route('profile.edit') }}"
-                           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 mt-3 sm:mt-0">
-                            <i data-lucide="edit-3" class="w-4 h-4 mr-2"></i>
-                            Edit Profil
-                        </a>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-slate-700 border border-white/80 shadow-sm text-xs sm:text-sm">
+                            <i data-lucide="inbox" class="w-4 h-4 text-emerald-500"></i>
+                            <span><span class="font-semibold">{{ $barangDiterima->count() }}</span> barang diterima</span>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-slate-700 border border-white/80 shadow-sm text-xs sm:text-sm">
+                            <i data-lucide="heart" class="w-4 h-4 text-rose-500"></i>
+                            <span><span class="font-semibold">{{ $favorites->count() }}</span> favorit</span>
+                        </div>
                     @endif
                 </div>
-                <p class="text-gray-500 mb-1">
-                    @<span>{{ $user->username }}</span> · Bergabung {{ $user->created_at->isoFormat('MMMM YYYY') }}
-                </p>
-                <div class="flex justify-center sm:justify-start gap-6 text-gray-600 my-3">
-                    <span>
-                        <strong class="text-gray-800">{{ $barangDonasi->count() }}</strong> Donasi
-                    </span>
-                    <span>
-                        <strong class="text-gray-800">4.8</strong>
-                        <i data-lucide="star" class="w-4 h-4 inline-block text-yellow-400 fill-current -mt-1"></i>
-                        Rating
-                    </span>
-                </div>
-                <p class="text-gray-700 max-w-lg">
+
+                {{-- Bio --}}
+                <p class="text-xs sm:text-sm text-blue-50/95 mt-1.5 max-w-2xl text-center md:text-left">
                     {{ $user->deskripsi ?? 'Pengguna ini belum menambahkan deskripsi.' }}
                 </p>
             </div>
         </div>
-    </div>
+    </section>
 
-    {{-- SATU x-data untuk NAV + SEMUA KONTEN TAB --}}
-    <div x-data="{ activeTab: 'donasi' }" x-cloak>
-        <!-- Tab Navigasi -->
-        <div class="mb-6">
-            <div class="border-b border-gray-300">
-                <nav class="flex -mb-px space-x-6">
-                    <a href="#donasi"
-                       @click.prevent="activeTab = 'donasi'"
-                       :class="{
-                            'border-blue-600 text-blue-600': activeTab === 'donasi',
-                            'border-transparent text-gray-700 hover:border-gray-400': activeTab !== 'donasi'
-                        }"
-                       class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
-                        Barang Didonasikan
-                    </a>
+    {{-- TAB + KONTEN --}}
+    <div x-data="{ activeTab: 'donasi' }" x-cloak class="space-y-4">
 
-                    @if(Auth::check() && Auth::id() == $user->id)
-                        <a href="#diterima"
-                           @click.prevent="activeTab = 'diterima'"
-                           :class="{
-                                'border-blue-600 text-blue-600': activeTab === 'diterima',
-                                'border-transparent text-gray-700 hover:border-gray-400': activeTab !== 'diterima'
-                            }"
-                           class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
-                            Barang Diterima
-                        </a>
+        {{-- NAV TAB --}}
+        <div class="bg-white/80 rounded-2xl border border-slate-200 shadow-sm px-3 sm:px-4 py-3">
+            <div class="flex flex-wrap gap-2">
+                <button
+                    @click="activeTab = 'donasi'"
+                    :class="activeTab === 'donasi'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100'"
+                    class="px-4 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center gap-2 transition"
+                >
+                    <i data-lucide="gift" class="w-4 h-4"></i>
+                    Barang Didonasikan
+                </button>
 
-                        <a href="#favorit"
-                           @click.prevent="activeTab = 'favorit'"
-                           :class="{
-                                'border-blue-600 text-blue-600': activeTab === 'favorit',
-                                'border-transparent text-gray-700 hover:border-gray-400': activeTab !== 'favorit'
-                            }"
-                           class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
-                            Favorit
-                        </a>
-                    @endif
-                </nav>
+                @if(Auth::check() && Auth::id() == $user->id)
+                    <button
+                        @click="activeTab = 'diterima'"
+                        :class="activeTab === 'diterima'
+                            ? 'bg-blue-600 text-white shadow-sm'
+                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100'"
+                        class="px-4 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center gap-2 transition"
+                    >
+                        <i data-lucide="inbox" class="w-4 h-4"></i>
+                        Barang Diterima
+                    </button>
+
+                    <button
+                        @click="activeTab = 'favorit'"
+                        :class="activeTab === 'favorit'
+                            ? 'bg-blue-600 text-white shadow-sm'
+                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100'"
+                        class="px-4 py-2 rounded-full text-xs sm:text-sm font-semibold flex items-center gap-2 transition"
+                    >
+                        <i data-lucide="heart" class="w-4 h-4"></i>
+                        Favorit
+                    </button>
+                @endif
             </div>
         </div>
 
-        <!-- KONTEN TAB -->
-        <!-- Tab 1: Barang Didonasikan (Publik) -->
-        <div x-show="activeTab === 'donasi'">
+        {{-- TAB 1: BARANG DIDONASIKAN --}}
+        <section x-show="activeTab === 'donasi'">
             @if($barangDonasi->isEmpty())
-                <div class="text-center text-gray-500 p-10 bg-white rounded-2xl shadow">
-                    <i data-lucide="package-x" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
-                    <p>{{ $user->nama_lengkap }} belum mendonasikan barang.</p>
+                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm px-6 py-10 text-center text-slate-500">
+                    <i data-lucide="package-x" class="w-12 h-12 mx-auto text-slate-300 mb-4"></i>
+                    <p class="text-sm">
+                        {{ $user->nama_lengkap }} belum mendonasikan barang.
+                    </p>
                 </div>
             @else
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     @foreach($barangDonasi as $item)
-                        <div class="bg-white rounded-xl shadow overflow-hidden">
-                            <a href="{{ route('barang.show', $item->id) }}">
-                                @if($item->foto_barang_utama)
-                                    <img src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}"
-                                         alt="{{ $item->nama_barang }}"
-                                         class="w-full h-32 md:h-40 object-cover">
-                                @else
-                                    <div class="w-full h-32 md:h-40 bg-gray-200 flex items-center justify-center">
-                                        <i data-lucide="image-off" class="w-10 h-10 text-gray-400"></i>
-                                    </div>
-                                @endif
-                                <div class="p-3">
-                                    <h4 class="font-semibold truncate text-sm md:text-base">{{ $item->nama_barang }}</h4>
-                                    <p class="text-xs text-gray-500 mt-1">{{ $item->lokasi }}</p>
+                        <a href="{{ route('barang.show', $item->id) }}"
+                           class="group bg-white/95 rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition overflow-hidden flex flex-col">
+                            @if($item->foto_barang_utama)
+                                <div class="relative">
+                                    <img
+                                        src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}"
+                                        alt="{{ $item->nama_barang }}"
+                                        class="w-full h-32 md:h-40 object-cover"
+                                    >
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                                    <span
+                                        class="absolute top-2 left-2 inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-white/90 text-slate-700 shadow-sm"
+                                    >
+                                        Donasi
+                                    </span>
                                 </div>
-                            </a>
-                        </div>
+                            @else
+                                <div class="w-full h-32 md:h-40 bg-slate-100 flex items-center justify-center">
+                                    <i data-lucide="image-off" class="w-7 h-7 text-slate-400"></i>
+                                </div>
+                            @endif
+
+                            <div class="p-3 flex flex-col gap-1 flex-1">
+                                <h4 class="font-semibold text-xs sm:text-sm text-slate-900 line-clamp-2">
+                                    {{ $item->nama_barang }}
+                                </h4>
+                                <p class="text-[11px] text-slate-500 flex items-center gap-1">
+                                    <i data-lucide="map-pin" class="w-3 h-3"></i>
+                                    <span class="truncate">{{ $item->lokasi }}</span>
+                                </p>
+                                <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                                    <i data-lucide="clock" class="w-3 h-3"></i>
+                                    <span>{{ $item->created_at->diffForHumans() }}</span>
+                                </p>
+                            </div>
+                        </a>
                     @endforeach
                 </div>
             @endif
-        </div>
+        </section>
 
         @if(Auth::check() && Auth::id() == $user->id)
-            <!-- Tab 2: Barang Diterima (Privat) -->
-            <div x-show="activeTab === 'diterima'" style="display: none;">
+            {{-- TAB 2: BARANG DITERIMA --}}
+            <section x-show="activeTab === 'diterima'" style="display: none;">
                 @if($barangDiterima->isEmpty())
-                    <div class="text-center text-gray-500 p-10 bg-white rounded-2xl shadow">
-                        <i data-lucide="inbox" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
-                        <p>Anda belum menerima barang donasi.</p>
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm px-6 py-10 text-center text-slate-500">
+                        <i data-lucide="inbox" class="w-12 h-12 mx-auto text-slate-300 mb-4"></i>
+                        <p class="text-sm">Anda belum menerima barang donasi.</p>
                     </div>
                 @else
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         @foreach($barangDiterima as $item)
-                            <div class="bg-white rounded-xl shadow overflow-hidden">
-                                <a href="{{ route('barang.show', $item->id) }}">
-                                    @if($item->foto_barang_utama)
-                                        <img src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}"
-                                             alt="{{ $item->nama_barang }}"
-                                             class="w-full h-32 md:h-40 object-cover">
-                                    @else
-                                        <div class="w-full h-32 md:h-40 bg-gray-200 flex items-center justify-center">
-                                            <i data-lucide="image-off" class="w-10 h-10 text-gray-400"></i>
-                                        </div>
-                                    @endif
-                                    <div class="p-3">
-                                        <h4 class="font-semibold truncate text-sm md:text-base">{{ $item->nama_barang }}</h4>
-                                        <p class="text-xs text-gray-500 mt-1">{{ $item->lokasi }}</p>
+                            <a href="{{ route('barang.show', $item->id) }}"
+                               class="group bg-white/95 rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition overflow-hidden flex flex-col">
+                                @if($item->foto_barang_utama)
+                                    <div class="relative">
+                                        <img
+                                            src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}"
+                                            alt="{{ $item->nama_barang }}"
+                                            class="w-full h-32 md:h-40 object-cover"
+                                        >
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                                        <span
+                                            class="absolute top-2 left-2 inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100"
+                                        >
+                                            Diterima
+                                        </span>
                                     </div>
-                                </a>
-                            </div>
+                                @else
+                                    <div class="w-full h-32 md:h-40 bg-slate-100 flex items-center justify-center">
+                                        <i data-lucide="image-off" class="w-7 h-7 text-slate-400"></i>
+                                    </div>
+                                @endif
+
+                                <div class="p-3 flex flex-col gap-1 flex-1">
+                                    <h4 class="font-semibold text-xs sm:text-sm text-slate-900 line-clamp-2">
+                                        {{ $item->nama_barang }}
+                                    </h4>
+                                    <p class="text-[11px] text-slate-500 flex items-center gap-1">
+                                        <i data-lucide="map-pin" class="w-3 h-3"></i>
+                                        <span class="truncate">{{ $item->lokasi }}</span>
+                                    </p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                                        <i data-lucide="clock" class="w-3 h-3"></i>
+                                        <span>{{ $item->created_at->diffForHumans() }}</span>
+                                    </p>
+                                </div>
+                            </a>
                         @endforeach
                     </div>
                 @endif
-            </div>
+            </section>
 
-            <!-- Tab 3: Favorit (Privat) -->
-            <div x-show="activeTab === 'favorit'" style="display: none;">
+            {{-- TAB 3: FAVORIT --}}
+            <section x-show="activeTab === 'favorit'" style="display: none;">
                 @if($favorites->isEmpty())
-                    <div class="text-center text-gray-500 p-10 bg-white rounded-2xl shadow">
-                        <i data-lucide="heart-off" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
-                        <p>Anda belum mem-favoritkan barang apapun.</p>
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm px-6 py-10 text-center text-slate-500">
+                        <i data-lucide="heart-off" class="w-12 h-12 mx-auto text-slate-300 mb-4"></i>
+                        <p class="text-sm">Anda belum mem-favoritkan barang apa pun.</p>
                     </div>
                 @else
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         @foreach($favorites as $item)
-                            <div class="bg-white rounded-xl shadow overflow-hidden relative">
+                            <div class="group bg-white/95 rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition overflow-hidden relative flex flex-col">
                                 <a href="{{ route('barang.show', $item->id) }}">
                                     @if($item->foto_barang_utama)
-                                        <img src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}"
-                                             alt="{{ $item->nama_barang }}"
-                                             class="w-full h-32 md:h-40 object-cover">
+                                        <div class="relative">
+                                            <img
+                                                src="{{ asset('uploads/barang/' . $item->foto_barang_utama) }}"
+                                                alt="{{ $item->nama_barang }}"
+                                                class="w-full h-32 md:h-40 object-cover"
+                                            >
+                                            <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                                        </div>
                                     @else
-                                        <div class="w-full h-32 md:h-40 bg-gray-200 flex items-center justify-center">
-                                            <i data-lucide="image-off" class="w-10 h-10 text-gray-400"></i>
+                                        <div class="w-full h-32 md:h-40 bg-slate-100 flex items-center justify-center">
+                                            <i data-lucide="image-off" class="w-7 h-7 text-slate-400"></i>
                                         </div>
                                     @endif
-                                    <div class="p-3">
-                                        <h4 class="font-semibold truncate text-sm md:text-base">{{ $item->nama_barang }}</h4>
-                                        <p class="text-xs text-gray-500 mt-1">{{ $item->lokasi }}</p>
+
+                                    <div class="p-3 flex flex-col gap-1 flex-1">
+                                        <h4 class="font-semibold text-xs sm:text-sm text-slate-900 line-clamp-2">
+                                            {{ $item->nama_barang }}
+                                        </h4>
+                                        <p class="text-[11px] text-slate-500 flex items-center gap-1">
+                                            <i data-lucide="map-pin" class="w-3 h-3"></i>
+                                            <span class="truncate">{{ $item->lokasi }}</span>
+                                        </p>
+                                        <p class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                                            <i data-lucide="clock" class="w-3 h-3"></i>
+                                            <span>{{ $item->created_at->diffForHumans() }}</span>
+                                        </p>
                                     </div>
                                 </a>
 
-                                {{-- Tombol un-favorite cepat (opsional) --}}
-                                <form action="{{ route('favorite.toggle', $item->id) }}"
-                                      method="POST"
-                                      class="absolute top-2 right-2">
+                                {{-- Tombol un-favorite --}}
+                                <form
+                                    action="{{ route('favorite.toggle', $item->id) }}"
+                                    method="POST"
+                                    class="absolute top-2 right-2"
+                                >
                                     @csrf
-                                    <button type="submit"
-                                            class="p-1.5 rounded-full bg-white/80 hover:bg-white text-red-500 shadow-sm transition">
+                                    <button
+                                        type="submit"
+                                        class="p-1.5 rounded-full bg-white/95 hover:bg-white text-red-500 shadow-sm transition"
+                                    >
                                         <i data-lucide="heart" class="w-4 h-4 fill-current"></i>
                                     </button>
                                 </form>
@@ -203,7 +318,7 @@
                         @endforeach
                     </div>
                 @endif
-            </div>
+            </section>
         @endif
     </div>
 </div>
