@@ -47,6 +47,44 @@
                 </span>
             </div>
         </div>
+
+        @auth
+            <div class="flex flex-wrap gap-2 justify-start sm:justify-end">
+                {{-- Laporkan barang --}}
+                <button
+                    type="button"
+                    onclick="openReportModal(
+                        '{{ route('report.barang', $barang->id) }}',
+                        {
+                            title: 'Laporkan Barang',
+                            subtitle: 'Laporkan jika barang ini tidak layak pakai, tidak sesuai deskripsi, atau berpotensi membahayakan penerima.'
+                        }
+                    )"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-100 transition"
+                >
+                    <i data-lucide="shield-alert" class="w-3 h-3"></i>
+                    Laporkan Barang
+                </button>
+
+                {{-- Laporkan pendonasi (user) --}}
+                @if($barang->donatur)
+                    <button
+                        type="button"
+                        onclick="openReportModal(
+                            '{{ route('report.user', $barang->donatur->id) }}',
+                            {
+                                title: 'Laporkan Pendonasi',
+                                subtitle: 'Gunakan fitur ini jika akun terasa mencurigakan, melakukan penipuan, atau melanggar aturan platform.'
+                            }
+                        )"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-slate-900 text-slate-50 hover:bg-slate-800 shadow-sm transition"
+                    >
+                        <i data-lucide="user-x" class="w-3 h-3"></i>
+                        Laporkan User
+                    </button>
+                @endif
+            </div>
+        @endauth
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] gap-8 items-start">
@@ -271,23 +309,163 @@
                 @endif
             </div>
 
+            {{-- Banner keamanan kecil --}}
+            <div class="bg-slate-900 text-slate-50 rounded-3xl px-4 py-3 flex flex-col sm:flex-row gap-3 sm:items-center">
+                <div class="flex items-start gap-2 text-xs sm:text-sm">
+                    <div class="mt-0.5">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+                    </div>
+                    <p>
+                        Jangan pernah mengirim uang atau data sensitif di luar platform. Laporkan jika ada aktivitas atau barang yang mencurigakan.
+                    </p>
+                </div>
+            </div>
+
         </div>
     </div>
 </main>
 
-{{-- SCRIPT GANTI GAMBAR UTAMA --}}
+{{-- ===================== MODAL LAPORAN (BARANG / USER) ===================== --}}
+<div id="report-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" data-report-close></div>
+
+    <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full mx-auto p-5 sm:p-6 border border-slate-100">
+        <div class="flex items-start justify-between gap-3 mb-3">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-rose-500" id="report-modal-label">
+                    Laporkan Konten
+                </p>
+                <h2 class="text-lg font-bold text-slate-900" id="report-modal-title">
+                    Laporkan
+                </h2>
+                <p class="text-xs text-slate-500 mt-1" id="report-modal-subtitle">
+                    Laporkan jika barang ini tidak layak pakai, tidak sesuai deskripsi, atau melanggar aturan platform.
+                </p>
+            </div>
+            <button type="button" class="p-2 rounded-full hover:bg-slate-100 text-slate-400" data-report-close>
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <form id="report-modal-form" method="POST" class="space-y-4">
+            @csrf
+            <div class="space-y-2">
+                <p class="text-xs font-medium text-slate-700">Pilih alasan cepat</p>
+                <div class="flex flex-wrap gap-2">
+                    @php
+                        // KHUSUS BARANG: alasan difokuskan ke kondisi / kesesuaian barang
+                        $reportReasons = [
+                            'Barang tidak layak pakai / rusak parah',
+                            'Barang tidak sesuai deskripsi',
+                            'Foto barang tidak sesuai (real pict berbeda / diambil dari internet)',
+                            'Barang berbahaya / melanggar aturan (misal: obat terlarang, senjata, dll)',
+                            'Lainnya (jelaskan di kolom di bawah)'
+                        ];
+                    @endphp
+                    @foreach($reportReasons as $reason)
+                        <button type="button"
+                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-medium bg-slate-50 text-slate-700 border border-slate-200 hover:border-rose-300 hover:bg-rose-50/70 transition"
+                                data-report-reason="{{ $reason }}">
+                            <i data-lucide="alert-circle" class="w-3 h-3"></i>
+                            <span class="whitespace-nowrap">{{ $reason }}</span>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label for="report-modal-reason" class="text-xs font-medium text-slate-700">
+                    Jelaskan singkat alasanmu <span class="text-rose-500">*</span>
+                </label>
+                <textarea id="report-modal-reason"
+                          name="reason"
+                          rows="4"
+                          required
+                          class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-400 resize-none"></textarea>
+                <p class="text-[11px] text-slate-400">
+                    Laporanmu bersifat rahasia dan hanya akan digunakan untuk menjaga kenyamanan dan keamanan penerima barang.
+                </p>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+                <button type="button" class="px-3 py-2 rounded-2xl text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" data-report-close>
+                    Batal
+                </button>
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-semibold bg-rose-600 text-white shadow-md hover:bg-rose-700 hover:shadow-lg transition">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                    Kirim Laporan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- SCRIPT: thumbnail + modal laporan --}}
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    // ========= Ganti gambar utama dari thumbnail =========
     const mainImg = document.getElementById("mainImage");
     const thumbs  = document.querySelectorAll(".thumb");
 
     thumbs.forEach(t => {
         t.addEventListener("click", () => {
+            if (!mainImg) return;
             mainImg.src = t.src;
             thumbs.forEach(x => x.classList.remove("border-blue-600"));
             t.classList.add("border-blue-600");
         });
     });
+
+    // ========= Modal Laporan =========
+    const reportModal = document.getElementById('report-modal');
+    if (reportModal) {
+        const form        = document.getElementById('report-modal-form');
+        const reasonInput = document.getElementById('report-modal-reason');
+        const titleEl     = document.getElementById('report-modal-title');
+        const subtitleEl  = document.getElementById('report-modal-subtitle');
+
+        window.openReportModal = function (action, options = {}) {
+            form.action            = action;
+            titleEl.textContent    = options.title || 'Laporkan';
+            subtitleEl.textContent = options.subtitle || 'Laporkan jika barang ini tidak layak pakai, tidak sesuai deskripsi, atau melanggar aturan platform.';
+            reasonInput.value      = options.defaultReason || '';
+            reportModal.classList.remove('hidden');
+            reportModal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+            reasonInput.focus();
+        };
+
+        function closeReportModal() {
+            reportModal.classList.add('hidden');
+            reportModal.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        reportModal.querySelectorAll('[data-report-close]').forEach(btn => {
+            btn.addEventListener('click', closeReportModal);
+        });
+
+        reportModal.addEventListener('click', (e) => {
+            if (e.target === reportModal) {
+                closeReportModal();
+            }
+        });
+
+        document.querySelectorAll('[data-report-reason]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const reason = btn.getAttribute('data-report-reason');
+                if (!reason) return;
+
+                if (!reasonInput.value.trim()) {
+                    reasonInput.value = reason;
+                } else {
+                    const trimmed = reasonInput.value.replace(/\s+$/, '');
+                    reasonInput.value = trimmed + (trimmed.endsWith('\n') ? '' : '\n') + reason;
+                }
+                reasonInput.focus();
+            });
+        });
+    }
 });
 </script>
 @endsection

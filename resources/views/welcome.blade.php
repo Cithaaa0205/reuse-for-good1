@@ -13,7 +13,7 @@
             background: radial-gradient(circle at center, #EBF8FF 0%, #D6E6F2 100%);
         }
     </style>
-</head>
+</head> 
 <body class="flex items-center justify-center min-h-screen">
 
     <div class="container mx-auto p-4">

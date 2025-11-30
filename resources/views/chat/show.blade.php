@@ -110,18 +110,35 @@
                 </div>
             </div>
 
-            {{-- Smart reply badge --}}
-            <div class="hidden sm:flex flex-col items-end gap-1">
-                <div class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 text-[11px] text-slate-500">
-                    <i data-lucide="sparkles" class="w-3 h-3"></i>
-                    <span>Smart reply aktif</span>
-                </div>
-                @if($smartTypeLabel)
-                    <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-[10px] text-blue-700 border border-blue-100">
-                        <i data-lucide="{{ $smartTypeIcon }}" class="w-3 h-3"></i>
-                        <span>Saran: {{ $smartTypeLabel }}</span>
+            {{-- Kanan: tombol Laporkan + info Smart Reply --}}
+            <div class="flex flex-col items-end gap-2">
+                {{-- Tombol Laporkan (pojok kanan atas) --}}
+                @auth
+                    <button
+                        id="btn-report-user"
+                        type="button"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold
+                               bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-100 hover:border-rose-200 transition"
+                        title="Laporkan akun / percakapan ini"
+                    >
+                        <i data-lucide="flag" class="w-3 h-3"></i>
+                        Laporkan
+                    </button>
+                @endauth
+
+                {{-- Smart reply badge --}}
+                <div class="hidden sm:flex flex-col items-end gap-1">
+                    <div class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 text-[11px] text-slate-500">
+                        <i data-lucide="sparkles" class="w-3 h-3"></i>
+                        <span>Smart reply aktif</span>
                     </div>
-                @endif
+                    @if($smartTypeLabel)
+                        <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-[10px] text-blue-700 border border-blue-100">
+                            <i data-lucide="{{ $smartTypeIcon }}" class="w-3 h-3"></i>
+                            <span>Saran: {{ $smartTypeLabel }}</span>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     </section>
@@ -247,7 +264,7 @@
                                 <i data-lucide="map-pin" class="w-4 h-4"></i>
                             </button>
 
-                            {{-- Tombol Smiley / Emoji (SUDAH DI-UPDATE ID-NYA) --}}
+                            {{-- Tombol Smiley / Emoji --}}
                             <button type="button" 
                                     id="btn-emoji"
                                     class="inline-flex items-center justify-center h-8 w-8 rounded-full text-slate-400 hover:text-yellow-500 hover:bg-yellow-50 transition" 
@@ -268,15 +285,90 @@
     </section>
 </div>
 
+{{-- ===================== MODAL LAPORAN USER / CHAT ===================== --}}
+@auth
+<div id="report-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" data-report-close></div>
+
+    <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full mx-auto p-5 sm:p-6 border border-slate-100">
+        <div class="flex items-start justify-between gap-3 mb-3">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wide text-rose-500">
+                    Laporkan Pengguna
+                </p>
+                <h2 class="text-lg font-bold text-slate-900">
+                    Laporkan {{ $otherUser->nama_lengkap }}
+                </h2>
+                <p class="text-xs text-slate-500 mt-1">
+                    Gunakan fitur ini jika akun terasa mencurigakan, melakukan penipuan, spam, atau melanggar aturan platform.
+                </p>
+            </div>
+            <button type="button" class="p-2 rounded-full hover:bg-slate-100 text-slate-400" data-report-close>
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <form id="report-form" method="POST" action="{{ route('report.user', $otherUser->id) }}" class="space-y-4">
+            @csrf
+            <div class="space-y-2">
+                <p class="text-xs font-medium text-slate-700">Pilih alasan cepat</p>
+                <div class="flex flex-wrap gap-2">
+                    @php
+                        $quickReasons = [
+                            'Spam / iklan berlebihan',
+                            'Penipuan / meminta data pribadi / pembayaran',
+                            'Info palsu atau menyesatkan',
+                            'Konten tidak pantas atau mengganggu',
+                            'Lainnya (jelaskan di kolom di bawah)'
+                        ];
+                    @endphp
+                    @foreach($quickReasons as $reason)
+                        <button type="button"
+                                class="report-reason-btn inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-medium bg-slate-50 text-slate-700 border border-slate-200 hover:border-rose-300 hover:bg-rose-50/70 transition"
+                                data-report-reason="{{ $reason }}">
+                            <i data-lucide="alert-circle" class="w-3 h-3"></i>
+                            <span class="whitespace-nowrap">{{ $reason }}</span>
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label for="report-reason" class="text-xs font-medium text-slate-700">
+                    Jelaskan singkat alasanmu <span class="text-rose-500">*</span>
+                </label>
+                <textarea id="report-reason"
+                          name="reason"
+                          rows="4"
+                          required
+                          class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-200 focus:border-rose-400 resize-none"></textarea>
+                <p class="text-[11px] text-slate-400">
+                    Laporanmu bersifat rahasia dan hanya akan digunakan untuk menjaga keamanan & kenyamanan platform.
+                </p>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+                <button type="button" class="px-3 py-2 rounded-2xl text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" data-report-close>
+                    Batal
+                </button>
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-semibold bg-rose-600 text-white shadow-md hover:bg-rose-700 hover:shadow-lg transition">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                    Kirim Laporan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endauth
+
 @push('scripts')
 {{-- Load Emoji Button Library via CDN --}}
-{{-- Kita menggunakan type="module" agar bisa menggunakan import --}}
 <script type="module">
     import { EmojiButton } from 'https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.2/dist/index.js';
 
     document.addEventListener('DOMContentLoaded', () => {
-        const input = document.getElementById('message-input');
-        const form  = document.getElementById('chat-form');
+        const input    = document.getElementById('message-input');
+        const form     = document.getElementById('chat-form');
         const btnEmoji = document.querySelector('#btn-emoji');
 
         // ==========================================
@@ -284,9 +376,9 @@
         // ==========================================
         if (btnEmoji && input) {
             const picker = new EmojiButton({
-                position: 'top-end', // Muncul di atas tombol
-                theme: 'auto',       // Sesuai tema browser (dark/light)
-                autoHide: false,     // Biar user bisa pilih banyak emoji sekaligus
+                position: 'top-end',
+                theme: 'auto',
+                autoHide: false,
                 rows: 4,
                 recentsCount: 10,
                 i18n: {
@@ -306,25 +398,20 @@
                 }
             });
 
-            // Saat emoji dipilih
             picker.on('emoji', selection => {
-                // Tambahkan emoji ke input
                 const text = input.value;
                 input.value = text + selection.emoji;
-                
-                // Trigger event input supaya textarea auto-resize
                 input.dispatchEvent(new Event('input'));
                 input.focus();
             });
 
-            // Saat tombol smile diklik
             btnEmoji.addEventListener('click', () => {
                 picker.togglePicker(btnEmoji);
             });
         }
 
         // ==========================================
-        // 2. Logic Auto Scroll & Resize (Standard)
+        // 2. Auto Scroll & Auto Resize
         // ==========================================
         const container = document.getElementById('message-container');
         if (container) {
@@ -350,7 +437,7 @@
         }
 
         // ==========================================
-        // 3. Logic Smart Reply
+        // 3. Smart Reply Chips
         // ==========================================
         const chips = document.querySelectorAll('.smart-reply-chip');
         chips.forEach(chip => {
@@ -372,7 +459,7 @@
         });
 
         // ==========================================
-        // 4. Logic Share Location
+        // 4. Share Location
         // ==========================================
         const btnLocation = document.getElementById('btn-share-location');
         if (btnLocation && input) {
@@ -382,11 +469,10 @@
                     return;
                 }
 
-                // Ubah icon loading
                 const originalIcon = btnLocation.innerHTML;
                 btnLocation.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-blue-500"></i>';
                 btnLocation.disabled = true;
-                if(typeof lucide !== 'undefined') lucide.createIcons();
+                if (typeof lucide !== 'undefined') lucide.createIcons();
 
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
@@ -395,15 +481,15 @@
                         const mapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
                         
                         const currentText = input.value.trim();
-                        const textToAdd = "Ini lokasi saya kak: " + mapsLink;
+                        const textToAdd   = "Ini lokasi saya kak: " + mapsLink;
                         
                         input.value = currentText + (currentText ? '\n' : '') + textToAdd;
                         input.dispatchEvent(new Event('input'));
                         input.focus();
 
                         btnLocation.innerHTML = originalIcon;
-                        btnLocation.disabled = false;
-                        if(typeof lucide !== 'undefined') lucide.createIcons();
+                        btnLocation.disabled  = false;
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
                     },
                     (error) => {
                         console.error(error);
@@ -413,10 +499,63 @@
                         }
                         alert(errorMsg);
                         btnLocation.innerHTML = originalIcon;
-                        btnLocation.disabled = false;
-                        if(typeof lucide !== 'undefined') lucide.createIcons();
+                        btnLocation.disabled  = false;
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
                     }
                 );
+            });
+        }
+
+        // ==========================================
+        // 5. Modal Laporkan User (header kanan atas)
+        // ==========================================
+        const reportModal = document.getElementById('report-modal');
+        const reportBtn   = document.getElementById('btn-report-user');
+
+        if (reportModal && reportBtn) {
+            const reasonInput = document.getElementById('report-reason');
+
+            const openModal = () => {
+                reportModal.classList.remove('hidden');
+                reportModal.classList.add('flex');
+                document.body.classList.add('overflow-hidden');
+                if (reasonInput) {
+                    reasonInput.focus();
+                }
+            };
+
+            const closeModal = () => {
+                reportModal.classList.add('hidden');
+                reportModal.classList.remove('flex');
+                document.body.classList.remove('overflow-hidden');
+            };
+
+            reportBtn.addEventListener('click', openModal);
+
+            reportModal.querySelectorAll('[data-report-close]').forEach(btn => {
+                btn.addEventListener('click', closeModal);
+            });
+
+            reportModal.addEventListener('click', (e) => {
+                if (e.target === reportModal) {
+                    closeModal();
+                }
+            });
+
+            // Chip alasan cepat
+            reportModal.querySelectorAll('.report-reason-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const reason = btn.getAttribute('data-report-reason');
+                    if (!reason) return;
+
+                    if (!reasonInput.value.trim()) {
+                        reasonInput.value = reason;
+                    } else {
+                        const trimmed = reasonInput.value.replace(/\s+$/, '');
+                        reasonInput.value = trimmed + (trimmed.endsWith('\n') ? '' : '\n') + reason;
+                    }
+                    reasonInput.focus();
+                });
             });
         }
     });

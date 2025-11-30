@@ -87,7 +87,7 @@
                         </a>
                     @endif
 
-                    <a href="{{ $isAdminArea ? route('admin.users.index') : route('home') }}" 
+                    <a href="{{ $isAdminArea ? route('admin.dashboard') : route('home') }}" 
                        class="flex items-center gap-2 group">
                         <div class="h-10 w-10 rounded-2xl bg-white/95 shadow-md flex items-center justify-center overflow-hidden">
                             <img class="h-9 w-9 object-contain group-hover:scale-105 transition-transform" 
@@ -138,6 +138,16 @@
                             </a>
                         @endif
 
+                        {{-- MENU BARU: LAPORAN --}}
+                        @if(Route::has('admin.reports.index'))
+                            <a href="{{ route('admin.reports.index') }}"
+                               class="px-3 py-2 rounded-full transition border border-white/10
+                                      {{ request()->routeIs('admin.reports.*') ? 'bg-white/15 text-white' : 'text-sky-100 hover:bg-white/10' }}">
+                                Laporan
+                            </a>
+                        @endif
+
+                        {{-- Kalau nanti punya halaman khusus pengajuan admin, ini bisa dipakai --}}
                         @if(Route::has('admin.requests.index'))
                             <a href="{{ route('admin.requests.index') }}"
                                class="px-3 py-2 rounded-full transition border border-white/10
@@ -276,7 +286,7 @@
         </div>
     </footer>
 
-    <!-- Script Inisialisasi Ikon -->
+    <!-- Script Inisialisasi Ikon & Search Tabel -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) {

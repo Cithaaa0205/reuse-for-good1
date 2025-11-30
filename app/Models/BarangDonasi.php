@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class BarangDonasi extends Model
 {
@@ -24,14 +24,17 @@ class BarangDonasi extends Model
         'foto_barang_lainnya',
         'catatan_pengambilan',
         'status',
-        // Kalau nanti kamu tambahkan kolom latitude/longitude untuk barang,
-        // tinggal aktifkan:
+        'is_hidden',
         // 'latitude',
         // 'longitude',
     ];
 
+    protected $casts = [
+        'is_hidden' => 'boolean',
+    ];
+
     /**
-     * Relasi: Barang donasi dimiliki oleh satu User (Donatur).
+     * Barang dimiliki oleh satu user (donatur).
      */
     public function donatur()
     {
@@ -39,7 +42,7 @@ class BarangDonasi extends Model
     }
 
     /**
-     * Relasi: Barang donasi termasuk dalam satu Kategori.
+     * Barang termasuk dalam satu kategori.
      */
     public function kategori()
     {
@@ -47,10 +50,19 @@ class BarangDonasi extends Model
     }
 
     /**
-     * Relasi: Barang donasi bisa memiliki banyak permintaan.
+     * Barang bisa memiliki banyak permintaan.
      */
     public function requestBarangs()
     {
         return $this->hasMany(RequestBarang::class, 'barang_donasi_id');
+    }
+
+    /**
+     * Laporan yang ditujukan ke barang ini.
+     */
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'reported_id')
+            ->where('reported_type', Report::TYPE_BARANG);
     }
 }

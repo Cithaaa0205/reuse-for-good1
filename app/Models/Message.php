@@ -9,11 +9,6 @@ class Message extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'sender_id',
         'receiver_id',
@@ -21,17 +16,12 @@ class Message extends Model
         'read_at',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
     protected $casts = [
         'read_at' => 'datetime',
     ];
 
     /**
-     * Relasi ke User (Pengirim).
+     * User pengirim pesan.
      */
     public function sender()
     {
@@ -39,10 +29,19 @@ class Message extends Model
     }
 
     /**
-     * Relasi ke User (Penerima).
+     * User penerima pesan.
      */
     public function receiver()
     {
         return $this->belongsTo(User::class, 'receiver_id');
+    }
+
+    /**
+     * Laporan yang ditujukan ke pesan ini.
+     */
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'reported_id')
+            ->where('reported_type', Report::TYPE_PESAN);
     }
 }
