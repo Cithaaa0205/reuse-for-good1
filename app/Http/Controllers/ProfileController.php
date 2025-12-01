@@ -16,13 +16,25 @@ class ProfileController extends Controller
     {
         $user = User::where('username', $username)->firstOrFail();
 
-        // Barang Donasi (Publik)
-        $barangDonasi   = $user->barangDonasis()->latest()->get();
+        $viewer  = Auth::user();
+        $isOwner = $viewer && $viewer->id === $user->id;
+        $isAdmin = $viewer && $viewer->role === 'admin';
+
+        // Barang Donasi:
+        // - kalau pemilik atau admin → lihat semua barang donasi user
+        // - kalau orang lain / tamu → hanya barang publik (Tersedia + tidak di-hide)
+        $barangDonasiQuery = $user->barangDonasis()->latest();
+
+        if (! $isOwner && ! $isAdmin) {
+            $barangDonasiQuery->publicVisible();
+        }
+
+        $barangDonasi   = $barangDonasiQuery->get();
         $barangDiterima = collect();
         $favorites      = collect();
 
-        // Jika melihat profil sendiri, tampilkan tab privat
-        if (Auth::check() && Auth::id() === $user->id) {
+        // Tab privat (Diterima & Favorit) hanya untuk pemilik profil
+        if ($isOwner) {
             $barangDiterima = $user->barangDiterima()->latest()->get();
             $favorites      = $user->favorites()->latest()->get();
         }
@@ -59,12 +71,10 @@ class ProfileController extends Controller
             'nomor_telepon'  => 'required|string|max:15',
             'deskripsi'      => 'nullable|string|max:500',
             'foto_profil'    => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            
+
             // Lokasi: opsional
             'provinsi'       => 'nullable|string|max:100',
             'kabupaten'      => 'nullable|string|max:100',
-            
-            // NOTE: Validasi password dipisah di bawah agar lebih aman
         ]);
 
         // ============================
@@ -108,22 +118,21 @@ class ProfileController extends Controller
         // ============================
         // 4. LOGIKA GANTI PASSWORD
         // ============================
-        // Cek jika user mengisi salah satu field password
         if ($request->filled('current_password') || $request->filled('password')) {
-            
-            // A. Wajibkan mengisi password lama
+
+            // A. Wajibkan password lama
             $request->validate([
                 'current_password' => 'required',
             ], [
-                'current_password.required' => 'Untuk mengganti password, harap masukkan password lama Anda.'
+                'current_password.required' => 'Untuk mengganti password, harap masukkan password lama Anda.',
             ]);
 
-            // B. Cek kesesuaian Password Lama dengan Database
+            // B. Cek password lama
             if (!Hash::check($request->current_password, $user->password)) {
                 return back()->withErrors(['current_password' => 'Password lama yang Anda masukkan salah.']);
             }
 
-            // C. Validasi Password Baru
+            // C. Validasi password baru
             $request->validate([
                 'password' => 'required|string|min:8|confirmed',
             ], [
@@ -131,7 +140,7 @@ class ProfileController extends Controller
                 'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
             ]);
 
-            // D. Simpan Password Baru (di-hash)
+            // D. Simpan password baru
             $user->password = Hash::make($request->password);
         }
 

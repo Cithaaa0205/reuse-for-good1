@@ -34,6 +34,16 @@ class BarangDonasi extends Model
     ];
 
     /**
+     * Scope: hanya barang yang boleh tampil ke publik
+     * (status Tersedia dan tidak di-hide admin).
+     */
+    public function scopePublicVisible($query)
+    {
+        return $query->where('status', 'Tersedia')
+                     ->where('is_hidden', false);
+    }
+
+    /**
      * Barang dimiliki oleh satu user (donatur).
      */
     public function donatur()

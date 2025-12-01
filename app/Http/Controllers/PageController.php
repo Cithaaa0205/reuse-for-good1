@@ -14,12 +14,13 @@ class PageController extends Controller
         if (Auth::check()) {
             return redirect()->route('home');
         }
+
         return view('welcome');
     }
 
     public function home()
     {
-        // Statistik global
+        // Statistik global (boleh menghitung semua, termasuk yang hidden)
         $stats = [
             'barang_didonasikan' => BarangDonasi::count(),
             'barang_diterima'    => BarangDonasi::where('status', 'Dipesan')->count(),
@@ -30,9 +31,12 @@ class PageController extends Controller
         $user = Auth::user();
 
         // ==== Rekomendasi barang berdasarkan lokasi user ====
-        $barangQuery = BarangDonasi::where('status', 'Tersedia');
+        // HANYA barang publik (Tersedia + tidak di-hide)
+        $barangQuery = BarangDonasi::publicVisible();
 
         if ($user && ($user->provinsi || $user->kabupaten)) {
+            // Prioritaskan barang di kabupaten & provinsi yang sama,
+            // lalu provinsi sama, lalu sisanya
             if ($user->kabupaten && $user->provinsi) {
                 $barangQuery->orderByRaw("
                     CASE 
@@ -72,6 +76,7 @@ class PageController extends Controller
             $barangQuery->latest();
         }
 
+        // Barang terbaru untuk section "Barang Terbaru di Sekitar Anda"
         $barangTerbaru = $barangQuery->take(10)->get();
 
         // Favorite items untuk user login
