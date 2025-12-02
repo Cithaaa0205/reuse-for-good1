@@ -53,6 +53,8 @@
 
     <form action="{{ route('barang.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
+        <!-- container untuk menampung input file (wajib untuk proses submit) -->
+        <div id="photo-inputs-container"></div>
 
         {{-- FOTO BARANG --}}
         <section
@@ -232,76 +234,88 @@
 @push('scripts')
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    // =============================== PROVINSI - KABUPATEN ===============================
+
+    // ====================== PROVINSI → KABUPATEN ======================
     const kabupatenData = {
         "DI Yogyakarta": ["Yogyakarta", "Sleman", "Bantul", "Kulon Progo", "Gunungkidul"],
-        "Jawa Tengah": ["Semarang", "Surakarta", "Magelang", "Tegal", "Purwokerto"],
-        "Jawa Barat": ["Bandung", "Bogor", "Bekasi", "Tasikmalaya", "Cirebon"],
-        "Jawa Timur": ["Surabaya", "Malang", "Kediri", "Madiun", "Banyuwangi"],
+        "Jawa Tengah":    ["Semarang", "Surakarta", "Magelang", "Tegal", "Purwokerto"],
+        "Jawa Barat":     ["Bandung", "Bogor", "Bekasi", "Tasikmalaya", "Cirebon"],
+        "Jawa Timur":     ["Surabaya", "Malang", "Kediri", "Madiun", "Banyuwangi"],
     };
 
     const provinsiSelect = document.getElementById("provinsi");
     const kabupatenSelect = document.getElementById("kabupaten");
 
     if (provinsiSelect && kabupatenSelect) {
-        const oldProvinsi = "{{ old('provinsi') }}";
-        const oldKabupaten = "{{ old('kabupaten') }}";
-
-        if (oldProvinsi && kabupatenData[oldProvinsi]) {
-            kabupatenData[oldProvinsi].forEach(k => {
-                const selected = k === oldKabupaten ? 'selected' : '';
-                kabupatenSelect.insertAdjacentHTML("beforeend", `<option value="${k}" ${selected}>${k}</option>`);
-            });
-        }
-
         provinsiSelect.addEventListener("change", function () {
             kabupatenSelect.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
-            const list = kabupatenData[this.value] || [];
-            list.forEach(k => kabupatenSelect.insertAdjacentHTML("beforeend", `<option value="${k}">${k}</option>`));
+            (kabupatenData[this.value] || []).forEach(k =>
+                kabupatenSelect.insertAdjacentHTML("beforeend", `<option value="${k}">${k}</option>`)
+            );
         });
     }
 
-    // =============================== MULTI IMAGE PREVIEW (SIMPLE) ===============================
+    // ====================== MULTI IMAGE PREVIEW + DELETE ======================
     const inputFoto = document.getElementById("foto_barang");
     const previewContainer = document.getElementById("preview-container");
 
-    if (!inputFoto || !previewContainer) return;
-
     const placeholderTemplate = previewContainer.innerHTML;
+    let selectedFiles = [];
 
-    // klik area preview = buka file picker
-    previewContainer.addEventListener("click", () => {
-        inputFoto.click();
+    previewContainer.addEventListener("click", () => inputFoto.click());
+
+    inputFoto.addEventListener("change", (e) => {
+        const files = Array.from(e.target.files);
+
+        files.forEach(file => {
+            if (selectedFiles.length < 5) selectedFiles.push(file);
+        });
+
+        inputFoto.value = "";
+        renderPreview();
     });
 
-    inputFoto.addEventListener("change", function () {
-        const files = Array.from(this.files);
-
-        // reset isi preview
+    function renderPreview() {
         previewContainer.innerHTML = "";
 
-        if (!files.length) {
+        if (selectedFiles.length === 0) {
             previewContainer.innerHTML = placeholderTemplate;
             return;
         }
 
-        if (files.length > 5) {
-            alert("Maksimal upload 5 foto!");
-        }
-
-        files.slice(0, 5).forEach(file => {
+        selectedFiles.forEach((file, index) => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const wrapper = document.createElement("div");
                 wrapper.className = "relative";
                 wrapper.innerHTML = `
-                    <img src="${e.target.result}" class="w-full h-40 object-cover rounded-2xl border border-slate-200 bg-white">
+                    <img src="${e.target.result}" class="w-full h-48 object-cover rounded-2xl border border-slate-200 bg-white">
+                    <button data-index="${index}"
+                        class="absolute top-2 right-2 bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow">
+                        ×
+                    </button>
                 `;
                 previewContainer.appendChild(wrapper);
             };
             reader.readAsDataURL(file);
         });
+
+        syncInput(); // <<============================ PENTING !!
+    }
+
+    function syncInput() {
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => dataTransfer.items.add(file));
+        inputFoto.files = dataTransfer.files;  // <<================== FIX NYA !!!
+    }
+
+    previewContainer.addEventListener("click", (e) => {
+        if (e.target.tagName === "BUTTON" && e.target.dataset.index !== undefined) {
+            selectedFiles.splice(parseInt(e.target.dataset.index), 1);
+            renderPreview();
+        }
     });
+
 });
 </script>
 @endpush

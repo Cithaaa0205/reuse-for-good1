@@ -309,7 +309,23 @@
             }
         });
     </script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if (session('success'))
+<script>
+    Swal.fire({
+        title: "Terima Kasih 🎉",
+        text: "{{ session('success') }}",
+        icon: "success",
+        confirmButtonText: "Sip!",
+        confirmButtonColor: "#2563eb",
+        customClass: {
+            popup: 'rounded-3xl shadow-xl'
+        }
+    });
+</script>
+@endif
+
     @stack('scripts')
 </body>
 </html>

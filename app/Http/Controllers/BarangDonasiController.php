@@ -189,89 +189,111 @@ class BarangDonasiController extends Controller
      * Simpan barang donasi baru.
      */
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'nama_barang'          => 'required|string|max:255',
-            'deskripsi'            => 'required|string',
-            'kategori_id'          => 'nullable|exists:kategoris,id',
-            'kondisi'              => 'required|string',
-            'provinsi'             => 'required|string',
-            'kabupaten'            => 'required|string',
-            'foto_barang'          => 'nullable|array',
-            'foto_barang.*'        => 'image|mimes:jpeg,png,jpg|max:10240',
-            'catatan_pengambilan'  => 'nullable|string',
-        ]);
+{
+    $validated = $request->validate([
+        'nama_barang'          => 'required|string|max:255',
+        'deskripsi'            => 'required|string',
+        'kategori_id'          => 'nullable|exists:kategoris,id',
+        'kondisi'              => 'required|string',
+        'provinsi'             => 'required|string',
+        'kabupaten'            => 'required|string',
+        'foto_barang'          => 'required|array|min:1',
+        'foto_barang.*'        => 'image|mimes:jpeg,png,jpg|max:10240',
+        'catatan_pengambilan'  => 'nullable|string',
+    ]);
 
-        // ==========================
-        // AUTO KATEGORI (jika user tidak pilih)
-        // ==========================
-        $kategoriId = $validated['kategori_id'] ?? null;
-
-        if (!$kategoriId) {
-            $kategoriId = $this->autoCategory->guessCategoryId(
-                $validated['nama_barang'],
-                $validated['deskripsi']
-            );
-        }
-
-        if (!$kategoriId) {
-            $fallback = Kategori::where('nama_kategori', 'like', '%lain%')->first()
-                ?? Kategori::orderBy('id')->first();
-
-            if ($fallback) {
-                $kategoriId = $fallback->id;
-            }
-        }
-
-        if (!$kategoriId) {
-            return back()
-                ->withErrors([
-                    'kategori_id' => 'Kategori belum tersedia di sistem. Tambahkan minimal satu kategori terlebih dahulu.',
-                ])
-                ->withInput();
-        }
-
-        // ==========================
-        // UPLOAD FOTO
-        // ==========================
-        $fotoUtama = null;
-        $fotoLain  = [];
-
-        if ($request->hasFile('foto_barang')) {
-            foreach ($request->file('foto_barang') as $index => $file) {
-                $namaFile = time() . '_' .
-                    Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) .
-                    '.' . $file->getClientOriginalExtension();
-
-                $file->move(public_path('uploads/barang'), $namaFile);
-
-                if ($index === 0) {
-                    $fotoUtama = $namaFile;
-                } else {
-                    $fotoLain[] = $namaFile;
-                }
-            }
-        }
-
-        BarangDonasi::create([
-            'donatur_id'          => Auth::id(),
-            'kategori_id'         => $kategoriId,
-            'nama_barang'         => $validated['nama_barang'],
-            'deskripsi'           => $validated['deskripsi'],
-            'kondisi'             => $validated['kondisi'],
-            'provinsi'            => $validated['provinsi'],
-            'kabupaten'           => $validated['kabupaten'],
-            'foto_barang_utama'   => $fotoUtama,
-            'foto_barang_lainnya' => json_encode($fotoLain),
-            'catatan_pengambilan' => $validated['catatan_pengambilan'] ?? null,
-            'status'              => 'Tersedia',
-            'is_hidden'           => false,
-        ]);
-
-        return redirect()
-            ->route('home')
-            ->with('success', 'Donasi berhasil diposting! Kategori sudah diisi secara otomatis oleh sistem.');
+    // ==========================
+    // ERROR JIKA USER SUBMIT TANPA FOTO
+    // ==========================
+    if (!$request->hasFile('foto_barang')) {
+        return back()
+            ->withErrors(['foto_barang' => 'Minimal unggah 1 foto barang!'])
+            ->withInput();
     }
+
+    // ==========================
+    // AUTO KATEGORI (jika user tidak pilih)
+    // ==========================
+    $kategoriId = $validated['kategori_id'] ?? null;
+
+    if (!$kategoriId) {
+        $kategoriId = $this->autoCategory->guessCategoryId(
+            $validated['nama_barang'],
+            $validated['deskripsi']
+        );
+    }
+
+    if (!$kategoriId) {
+        $fallback = Kategori::where('nama_kategori', 'like', '%lain%')->first()
+            ?? Kategori::orderBy('id')->first();
+
+        if ($fallback) {
+            $kategoriId = $fallback->id;
+        }
+    }
+
+    if (!$kategoriId) {
+        return back()
+            ->withErrors([
+                'kategori_id' => 'Kategori belum tersedia di sistem. Tambahkan minimal satu kategori terlebih dahulu.',
+            ])
+            ->withInput();
+    }
+
+    // ==========================
+    // UPLOAD FOTO
+    // ==========================
+    $fotoUtama = null;
+    $fotoLain  = [];
+
+    if ($request->hasFile('foto_barang')) {
+        foreach ($request->file('foto_barang') as $index => $file) {
+            $namaFile = time() . '_' .
+                Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) .
+                '.' . $file->getClientOriginalExtension();
+
+            $file->move(public_path('uploads/barang'), $namaFile);
+
+            if ($index === 0) {
+                $fotoUtama = $namaFile;
+            } else {
+                $fotoLain[] = $namaFile;
+            }
+        }
+    }
+
+    // ==========================
+    // CEK FOTO UTAMA WAJIB ADA
+    // ==========================
+    if (!$fotoUtama) {
+        return back()
+            ->withErrors(['foto_barang' => 'Minimal unggah 1 foto barang!'])
+            ->withInput();
+    }
+
+    // ==========================
+    // SIMPAN DB
+    // ==========================
+    BarangDonasi::create([
+        'donatur_id'          => Auth::id(),
+        'kategori_id'         => $kategoriId,
+        'nama_barang'         => $validated['nama_barang'],
+        'deskripsi'           => $validated['deskripsi'],
+        'kondisi'             => $validated['kondisi'],
+        'provinsi'            => $validated['provinsi'],
+        'kabupaten'           => $validated['kabupaten'],
+        'foto_barang_utama'   => $fotoUtama,
+        'foto_barang_lainnya' => json_encode($fotoLain),
+        'catatan_pengambilan' => $validated['catatan_pengambilan'] ?? null,
+        'status'              => 'Tersedia',
+        'is_hidden'           => false,
+    ]);
+
+    return redirect()
+        ->route('home')
+        ->with('success', 'Donasi berhasil diposting! Kategori sudah diisi secara otomatis oleh sistem.');
+}
+
 
     /**
      * Detail satu barang donasi.

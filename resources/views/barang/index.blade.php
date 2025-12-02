@@ -53,7 +53,7 @@
                     Donasikan Barang
                 </a>
 
-                {{-- TOMBOL FILTER LOKASI (BUKAN PINDAH HALAMAN LAGI) --}}
+                {{-- TOMBOL FILTER --}}
                 <button type="button" id="btn-open-location-filter"
                         class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-medium
                                bg-blue-500/40 text-blue-50 border border-blue-100/60 hover:bg-blue-600/60 transition">
@@ -160,7 +160,7 @@
         </div>
     </section>
 
-    {{-- KATEGORI BAR (pill scrollable) --}}
+    {{-- KATEGORI BAR --}}
     <section class="space-y-3">
         <div class="flex items-center justify-between gap-2">
             <h2 class="text-sm font-semibold text-slate-800 uppercase tracking-wide">
@@ -172,8 +172,8 @@
             <a href="{{ url('/barang') }}"
                class="whitespace-nowrap px-4 py-2 rounded-full text-xs sm:text-sm font-medium
                       {{ request('kategori')
-                            ? 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200/70 hover:-translate-y-[1px] transition'
-                            : 'bg-blue-600 text-white border border-blue-600 shadow-md hover:shadow-lg hover:-translate-y-[1px] transition' }}">
+                            ? 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200/70 transition'
+                            : 'bg-blue-600 text-white border border-blue-600 shadow-md hover:shadow-lg transition' }}">
                 Semua
             </a>
 
@@ -181,8 +181,8 @@
                 <a href="{{ url('/barang?kategori=' . $kategori->slug) }}"
                    class="whitespace-nowrap px-4 py-2 rounded-full text-xs sm:text-sm font-medium border
                           {{ request('kategori') === $kategori->slug
-                                ? 'bg-blue-600 text-white border-blue-600 shadow-md hover:shadow-lg hover:-translate-y-[1px] transition'
-                                : 'bg-white text-slate-600 border-slate-200 shadow-sm hover:bg-slate-50 hover:-translate-y-[1px] transition' }}">
+                                ? 'bg-blue-600 text-white border-blue-600 shadow-md hover:shadow-lg transition'
+                                : 'bg-white text-slate-600 border-slate-200 shadow-sm hover:bg-slate-50 transition' }}">
                     {{ $kategori->nama_kategori }}
                 </a>
             @endforeach
@@ -202,37 +202,42 @@
     {{-- GRID BARANG --}}
     <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
         @forelse($barang as $item)
+            @php
+                $fotoLain = $item->foto_barang_lainnya ? json_decode($item->foto_barang_lainnya, true) : [];
+                $totalFoto = ($item->foto_barang_utama ? 1 : 0) + count($fotoLain);
+            @endphp
+
             <a href="{{ route('barang.show', $item->id) }}"
-               class="group bg-white/95 rounded-3xl border border-slate-200 shadow-[0_18px_40px_rgba(15,23,42,0.06)]
-                      hover:shadow-[0_24px_55px_rgba(15,23,42,0.10)] hover:-translate-y-1 transition overflow-hidden flex flex-col">
+               class="group bg-white/95 rounded-3xl border border-slate-200 shadow-md hover:-translate-y-1 transition overflow-hidden flex flex-col">
 
-                {{-- Gambar --}}
-                @if($item->foto_barang_utama)
-                    <div class="relative">
-                        <img
-                            src="{{ asset('uploads/barang/'.$item->foto_barang_utama) }}"
-                            onerror="this.onerror=null; this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=No+Image';"
-                            alt="{{ $item->nama_barang }}"
-                            class="w-full h-40 object-cover object-center">
-                        <div
-                            class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                {{-- FOTO --}}
+                <div class="relative">
+                    <img
+                        src="{{ $item->foto_barang_utama ? asset('uploads/barang/'.$item->foto_barang_utama) : 'https://placehold.co/300x200/f3f4f6?text=No+Image' }}"
+                        loading="lazy"
+                        onerror="this.onerror=null;this.src='https://placehold.co/400x300/f3f4f6/a1a1aa?text=No+Image';"
+                        alt="{{ $item->nama_barang }}"
+                        class="w-full h-40 object-cover object-center rounded-t-3xl">
 
-                        {{-- Badge kategori --}}
-                        <div class="absolute top-2 left-2">
-                            <span
-                                class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold
-                                           bg-white/90 text-slate-700 border border-slate-200 shadow-sm">
-                                {{ $item->kategori->nama_kategori ?? 'Tanpa Kategori' }}
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+
+                    <div class="absolute top-2 left-2">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-white/90 text-slate-700 border border-slate-200 shadow-sm">
+                            {{ $item->kategori->nama_kategori ?? 'Tanpa Kategori' }}
+                        </span>
+                    </div>
+
+                    @if($totalFoto > 1)
+                        <div class="absolute bottom-2 right-2">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/55 text-white text-[10px] backdrop-blur">
+                                <i data-lucide="images" class="w-3 h-3"></i>
+                                {{ $totalFoto }} foto
                             </span>
                         </div>
-                    </div>
-                @else
-                    <div class="w-full h-40 bg-slate-100 flex items-center justify-center">
-                        <i data-lucide="image-off" class="w-6 h-6 text-slate-400"></i>
-                    </div>
-                @endif
+                    @endif
+                </div>
 
-                {{-- Konten --}}
+                {{-- KONTEN --}}
                 <div class="p-4 flex flex-col gap-1 flex-1">
                     <p class="font-semibold text-sm text-slate-900 line-clamp-2">
                         {{ $item->nama_barang }}
@@ -241,21 +246,21 @@
                     <p class="text-[11px] text-slate-500 flex items-center gap-1 mt-1">
                         <i data-lucide="map-pin" class="w-3 h-3 text-rose-500"></i>
                         <span class="truncate">
-                            {{ $item->kabupaten }}, {{ $item->provinsi }}
+                            {{ $item->kabupaten ?? '-' }}, {{ $item->provinsi ?? '-' }}
                         </span>
                     </p>
 
                     @if(isset($item->distance))
                         <p class="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
                             <i data-lucide="navigation" class="w-3 h-3"></i>
-                            <span>{{ number_format($item->distance, 1) }} km dari lokasi Anda</span>
+                            {{ number_format($item->distance, 1) }} km dari lokasi Anda
                         </p>
                     @endif
 
                     <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500">
                         <span class="inline-flex items-center gap-1">
                             <i data-lucide="clock" class="w-3 h-3"></i>
-                            <span>{{ $item->created_at->diffForHumans() }}</span>
+                            {{ $item->created_at->diffForHumans() }}
                         </span>
                         <span
                             class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-50 border border-slate-200">
@@ -288,7 +293,9 @@
 
 </div>
 
-{{-- MODAL FILTER LOKASI (HANYA UNTUK TAMPILAN, TIDAK UBAH DATA AKUN) --}}
+
+
+{{-- MODAL FILTER --}}
 <div id="location-filter-modal"
      class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-900/30 backdrop-blur-sm px-4">
     <div
@@ -361,67 +368,138 @@
     </div>
 </div>
 
-{{-- SCRIPT UNTUK MODAL + KABUPATEN --}}
+
+
+{{-- SCRIPT --}}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('location-filter-modal');
-    const openBtn = document.getElementById('btn-open-location-filter');
-    const closeBtn = document.getElementById('btn-close-location-filter');
+document.addEventListener("DOMContentLoaded", () => {
+    const inputFoto = document.getElementById("foto_barang");
+    const previewContainer = document.getElementById("preview-container");
+    const maxFiles = 5;
+    let selectedFiles = [];
 
-    function openModal() {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
+    inputFoto.addEventListener("change", function () {
+        const newFiles = Array.from(this.files);
 
-    function closeModal() {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
+        if (selectedFiles.length + newFiles.length > maxFiles) {
+            alert(`Maksimal upload ${maxFiles} foto!`);
+            return;
+        }
 
-    if (openBtn) openBtn.addEventListener('click', openModal);
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        selectedFiles = [...selectedFiles, ...newFiles];
+        previewContainer.innerHTML = ""; // reset untuk render ulang semua preview
 
-    // klik di luar card untuk close
-    modal?.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "relative w-32 h-32";
+
+                wrapper.innerHTML = `
+                    <img src="${e.target.result}"
+                        class="w-32 h-32 object-cover rounded-xl border border-slate-300"/>
+                    <button type="button" data-index="${index}"
+                        class="absolute top-1 right-1 bg-red-600 text-white text-xs rounded-full px-1">
+                        ×
+                    </button>
+                `;
+
+                previewContainer.appendChild(wrapper);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // tombol hapus foto
+        previewContainer.addEventListener("click", (e) => {
+            if (e.target.tagName === "BUTTON") {
+                const i = e.target.getAttribute("data-index");
+                selectedFiles.splice(i, 1);
+
+                previewContainer.innerHTML = "";
+                selectedFiles.forEach((file, idx) => {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const wrap = document.createElement("div");
+                        wrap.className = "relative w-32 h-32";
+                        wrap.innerHTML = `
+                            <img src="${ev.target.result}"
+                                 class="w-32 h-32 object-cover rounded-xl border border-slate-300">
+                            <button type="button" data-index="${idx}"
+                                    class="absolute top-1 right-1 bg-red-600 text-white text-xs rounded-full px-1">
+                                ×
+                            </button>
+                        `;
+                        previewContainer.appendChild(wrap);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+    });
+});
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    const inputFoto = document.getElementById("foto_barang");
+    const previewContainer = document.getElementById("preview-container");
+
+    let fileArray = []; // penyimpan permanen
+    const maxFiles = 5;
+
+    inputFoto.addEventListener("change", function () {
+        const newFiles = Array.from(this.files);
+
+        newFiles.forEach(file => {
+            if (fileArray.length < maxFiles) {
+                fileArray.push(file);
+            }
+        });
+
+        this.value = ""; // reset input supaya tidak replace internal file list
+
+        renderPreview();
     });
 
-    // ---- data kabupaten untuk filter (static sama seperti halaman lokasi) ----
-    const kabupatenData = {
-        "DI Yogyakarta": ["Yogyakarta", "Sleman", "Bantul", "Kulon Progo", "Gunungkidul"],
-        "Jawa Tengah": ["Semarang", "Surakarta", "Magelang", "Tegal", "Purwokerto"],
-        "Jawa Barat": ["Bandung", "Bogor", "Bekasi", "Tasikmalaya", "Cirebon"],
-        "Jawa Timur": ["Surabaya", "Malang", "Kediri", "Madiun", "Banyuwangi"],
-    };
+    function renderPreview() {
+        previewContainer.innerHTML = "";
 
-    const provSelect  = document.getElementById('filter_provinsi');
-    const kabSelect   = document.getElementById('filter_kabupaten');
+        fileArray.forEach((file, index) => {
+            const reader = new FileReader();
 
-    const initialProv = @json(request('filter_provinsi'));
-    const initialKab  = @json(request('filter_kabupaten'));
+            reader.onload = (e) => {
+                const div = document.createElement("div");
+                div.classList = "relative w-32 h-32";
 
-    function populateKabupaten(provinsi, selectedKabupaten) {
-        if (!kabSelect) return;
+                div.innerHTML = `
+                    <img src="${e.target.result}" class="w-32 h-32 object-cover rounded-xl border border-gray-300">
+                    <button type="button" data-index="${index}"
+                        class="absolute top-1 right-1 bg-red-600 text-white text-xs rounded-full px-1">×</button>
+                `;
 
-        kabSelect.innerHTML = '<option value="">Semua kabupaten/kota</option>';
+                previewContainer.appendChild(div);
+            };
 
-        const list = kabupatenData[provinsi] || [];
-        list.forEach(kab => {
-            const opt = document.createElement('option');
-            opt.value = kab;
-            opt.textContent = kab;
-            if (kab === selectedKabupaten) opt.selected = true;
-            kabSelect.appendChild(opt);
+            reader.readAsDataURL(file);
         });
+
+        updateRealInput();
     }
 
-    if (initialProv) {
-        populateKabupaten(initialProv, initialKab);
+    function updateRealInput() {
+        const dt = new DataTransfer();
+        fileArray.forEach(file => dt.items.add(file));
+        inputFoto.files = dt.files; // hanya sekali assign
     }
 
-    provSelect?.addEventListener('change', function () {
-        populateKabupaten(this.value, null);
+    previewContainer.addEventListener("click", (e) => {
+        if (e.target.tagName === "BUTTON") {
+            const i = e.target.dataset.index;
+            fileArray.splice(i, 1);
+            renderPreview();
+        }
     });
 });
 </script>
+
+
 @endsection

@@ -282,15 +282,21 @@
                                 </p>
                             </div>
                         @else
-                            <form action="{{ route('request.store', $barang->id) }}" method="POST">
-                                @csrf
-                                <button type="submit"
-                                        class="inline-flex items-center justify-center w-full px-4 py-3 rounded-2xl text-sm font-semibold
-                                               bg-blue-600 text-white hover:bg-blue-700 shadow-md">
-                                    <i data-lucide="hand-heart" class="w-4 h-4 mr-2"></i>
-                                    Ajukan Penerimaan Barang
-                                </button>
-                            </form>
+<form action="{{ route('request.store', $barang->id) }}" method="POST" class="space-y-3">
+    @csrf
+    <textarea name="alasan_permintaan" rows="3"
+        class="w-full text-sm border border-slate-300 bg-slate-50 rounded-2xl p-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
+        placeholder="Tulis alasan atau pesanmu… Contoh: Sepatu ini untuk lomba sekolah minggu depan 🙏"
+        required></textarea>
+
+    <button type="submit"
+            class="inline-flex items-center justify-center w-full px-4 py-3 rounded-2xl text-sm font-semibold
+                   bg-blue-600 text-white hover:bg-blue-700 shadow-md">
+        <i data-lucide="hand-heart" class="w-4 h-4 mr-2"></i>
+        Ajukan Penerimaan Barang
+    </button>
+</form>
+
                         @endif
                     @endif
                 @else

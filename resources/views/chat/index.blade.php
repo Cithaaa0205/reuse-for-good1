@@ -2,6 +2,8 @@
 
 @section('title', 'Pesan')
 @section('showBackButton', true)
+@section('backButtonUrl', route('home'))
+
 
 @section('content')
 <div class="max-w-3xl mx-auto space-y-6">

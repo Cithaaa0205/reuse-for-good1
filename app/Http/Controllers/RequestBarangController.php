@@ -12,45 +12,44 @@ class RequestBarangController extends Controller
     /**
      * Simpan pengajuan permintaan barang
      */
-    public function store(Request $request, BarangDonasi $barang)
-    {
-        $userId = Auth::id();
+public function store(Request $request, BarangDonasi $barang)
+{
+    $userId = Auth::id();
 
-        // Cek pemilik barang
-        if ($barang->donatur_id == $userId) {
-            return back()->with('error', 'Anda tidak dapat meminta barang Anda sendiri.');
-        }
+    $request->validate([
+        'alasan_permintaan' => 'required|string|max:500',
+    ]);
 
-        // Cek status barang
-        if ($barang->status !== 'Tersedia') {
-            return back()->with('error', 'Barang ini sudah tidak tersedia.');
-        }
-
-        // Cek request sebelumnya
-        $existingRequest = RequestBarang::where('barang_donasi_id', $barang->id)
-                            ->where('penerima_id', $userId)
-                            ->first();
-
-        // Jika sudah request & status Ditolak -> hapus dan izinkan request ulang
-        if ($existingRequest && $existingRequest->status === 'Ditolak') {
-            $existingRequest->delete();
-        }
-
-        // Jika sudah request & status masih aktif (Diajukan / Disetujui)
-        if ($existingRequest && $existingRequest->status !== 'Ditolak') {
-            return back()->with('error', 'Anda sudah mengajukan permintaan untuk barang ini.');
-        }
-
-        // Buat request baru
-        RequestBarang::create([
-            'penerima_id' => $userId,
-            'barang_donasi_id' => $barang->id,
-            'status' => 'Diajukan',
-            'alasan_permintaan' => 'Saya sangat membutuhkan barang ini.',
-        ]);
-
-        return back()->with('success', 'Permintaan berhasil diajukan! Tunggu konfirmasi pendonasi.');
+    if ($barang->donatur_id == $userId) {
+        return back()->with('error', 'Anda tidak dapat meminta barang Anda sendiri.');
     }
+
+    if ($barang->status !== 'Tersedia') {
+        return back()->with('error', 'Barang ini sudah tidak tersedia.');
+    }
+
+    $existingRequest = RequestBarang::where('barang_donasi_id', $barang->id)
+                        ->where('penerima_id', $userId)
+                        ->first();
+
+    if ($existingRequest && $existingRequest->status === 'Ditolak') {
+        $existingRequest->delete();
+    }
+
+    if ($existingRequest && $existingRequest->status !== 'Ditolak') {
+        return back()->with('error', 'Anda sudah mengajukan permintaan untuk barang ini.');
+    }
+
+    RequestBarang::create([
+        'penerima_id'        => $userId,
+        'barang_donasi_id'   => $barang->id,
+        'status'             => 'Diajukan',
+        'alasan_permintaan'  => $request->alasan_permintaan, // <── Ambil dari input user
+    ]);
+
+    return back()->with('success', 'Permintaan berhasil diajukan! Tunggu konfirmasi pendonasi.');
+}
+
 
     /**
      * Kelola Pengajuan Pendonasi
