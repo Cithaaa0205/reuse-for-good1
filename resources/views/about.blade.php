@@ -6,40 +6,113 @@
 @section('content')
 <div class="max-w-6xl mx-auto space-y-8">
 
+    {{-- ANIMASI KHUSUS HALAMAN TENTANG --}}
+    <style>
+        @keyframes heroFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px) scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .hero-animate {
+            opacity: 0;
+            animation: heroFadeUp .7s ease-out forwards;
+        }
+
+        .hero-animate-delay-1 { animation-delay: .08s; }
+        .hero-animate-delay-2 { animation-delay: .16s; }
+        .hero-animate-delay-3 { animation-delay: .24s; }
+
+        @keyframes heroOrbFloat {
+            0%, 100% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+            50% {
+                transform: translate3d(22px, -16px, 0) scale(1.06);
+            }
+        }
+
+        .hero-orb-1 {
+            animation: heroOrbFloat 24s ease-in-out infinite;
+        }
+
+        .hero-orb-2 {
+            animation: heroOrbFloat 30s ease-in-out infinite alternate;
+        }
+
+        @keyframes cardFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(0.985);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .card-animate {
+            opacity: 0;
+            animation: cardFadeUp .55s ease-out forwards;
+        }
+
+        /* Hover glow untuk header Contact Us TANPA menimpa animation */
+        .contact-header-glow {
+            transition: box-shadow .35s ease, transform .35s ease;
+        }
+
+        .contact-header-glow:hover {
+            box-shadow: 0 24px 70px rgba(56,189,248,0.22);
+            transform: translateY(-2px);
+        }
+    </style>
+
     {{-- HERO / HEADER --}}
     <section
-        class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-blue-800 to-sky-600 text-white shadow-xl"
+        class="hero-animate relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-blue-800 to-sky-600 text-white shadow-xl"
     >
+        {{-- gradient utama --}}
         <div class="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top_left,_#38bdf8_0,_transparent_55%),_radial-gradient(circle_at_bottom_right,_#22c55e_0,_transparent_55%)]"></div>
+
+        {{-- orb dekoratif --}}
+        <div class="pointer-events-none hero-orb-1 absolute -bottom-16 -right-20 w-56 h-56 rounded-full border border-white/25 opacity-40"></div>
+        <div class="pointer-events-none hero-orb-2 absolute -top-14 right-1/3 w-40 h-40 rounded-full border border-white/20 opacity-35"></div>
 
         <div class="relative px-6 sm:px-10 py-10 sm:py-12 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
             <div class="flex-1 space-y-3">
-                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold tracking-wide uppercase">
+                <span class="hero-animate hero-animate-delay-1 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold tracking-wide uppercase">
                     <i data-lucide="info" class="w-3 h-3"></i>
                     Tentang ReuseForGood
                 </span>
-                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight">
+                <h1 class="hero-animate hero-animate-delay-2 text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight">
                     Mengubah Barang Bekas
                     <span class="text-sky-200">Menjadi Harapan Baru</span>
                 </h1>
-                <p class="text-sm sm:text-base text-slate-100/80 max-w-2xl">
+                <p class="hero-animate hero-animate-delay-3 text-sm sm:text-base text-slate-100/80 max-w-2xl">
                     ReuseForGood membantu menghubungkan barang bekas layak pakai dengan orang-orang yang benar-benar
                     membutuhkan, dengan cara yang mudah, transparan, dan gratis.
                 </p>
 
-                <div class="flex flex-wrap gap-2 pt-2 text-[11px] sm:text-xs text-sky-100/90">
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 border border-white/15">
+                <div class="mt-1 flex flex-wrap gap-2 pt-1 text-[11px] sm:text-xs text-sky-100/90">
+                    <span class="card-animate inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 border border-white/15"
+                          style="animation-delay:.26s">
                         <i data-lucide="leaf" class="w-3 h-3"></i>
                         Kurangi limbah, tingkatkan manfaat
                     </span>
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 border border-white/15">
+                    <span class="card-animate inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 border border-white/15"
+                          style="animation-delay:.32s">
                         <i data-lucide="users" class="w-3 h-3"></i>
-                        Menghubungkan donatur & penerima
+                        Menghubungkan donatur &amp; penerima
                     </span>
                 </div>
             </div>
 
-            <div class="hidden sm:flex flex-col items-end gap-3">
+            <div class="hidden sm:flex flex-col items-end gap-3 hero-animate hero-animate-delay-3">
                 <div class="rounded-2xl bg-white/10 backdrop-blur px-4 py-3 text-right shadow-lg border border-white/20">
                     <p class="text-[11px] text-sky-100/90 mb-1">Misi Kami</p>
                     <p class="text-sm font-semibold">Barang bekas yang bermanfaat tak perlu berakhir di tempat sampah.</p>
@@ -60,8 +133,9 @@
         <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6">
             {{-- LOGO & DESKRIPSI --}}
             <div
-                class="bg-gradient-to-br from-sky-100 via-slate-50 to-emerald-100 rounded-3xl p-[1.5px]
+                class="card-animate bg-gradient-to-br from-sky-100 via-slate-50 to-emerald-100 rounded-3xl p-[1.5px]
                        shadow-[0_18px_55px_rgba(37,99,235,0.16)] ring-1 ring-sky-100/70"
+                style="animation-delay:.06s"
             >
                 <div class="bg-white/95 rounded-[1.4rem] h-full p-6 flex flex-col items-center text-center gap-3">
                     <div class="relative mb-2">
@@ -86,8 +160,9 @@
 
             {{-- SEJARAH / LATAR BELAKANG --}}
             <div
-                class="bg-gradient-to-br from-sky-100 via-indigo-50 to-slate-100 rounded-3xl p-[1.5px]
+                class="card-animate bg-gradient-to-br from-sky-100 via-indigo-50 to-slate-100 rounded-3xl p-[1.5px]
                        shadow-[0_18px_55px_rgba(59,130,246,0.18)] ring-1 ring-sky-100/70"
+                style="animation-delay:.14s"
             >
                 <div class="bg-white/95 rounded-[1.4rem] h-full p-6 flex flex-col gap-3 text-center">
                     <div class="overflow-hidden rounded-2xl border border-slate-100 shadow-md">
@@ -109,8 +184,9 @@
 
             {{-- TIM KAMI --}}
             <div
-                class="bg-gradient-to-br from-violet-100 via-sky-50 to-slate-100 rounded-3xl p-[1.5px]
+                class="card-animate bg-gradient-to-br from-violet-100 via-sky-50 to-slate-100 rounded-3xl p-[1.5px]
                        shadow-[0_18px_55px_rgba(129,140,248,0.20)] ring-1 ring-indigo-100/70"
+                style="animation-delay:.22s"
             >
                 <div class="bg-white/95 rounded-[1.4rem] h-full p-6 flex flex-col gap-3 text-center">
                     <div class="overflow-hidden rounded-2xl border border-slate-100 shadow-md">
@@ -136,7 +212,8 @@
     <section class="space-y-6">
         {{-- Header Contact --}}
         <div
-            class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-sky-50 via-slate-50 to-emerald-50 border border-slate-100 px-6 sm:px-10 py-8 shadow-md"
+            class="card-animate contact-header-glow relative overflow-hidden rounded-3xl bg-gradient-to-r from-sky-50 via-slate-50 to-emerald-50 border border-slate-100 px-6 sm:px-10 py-8 shadow-md"
+            style="animation-delay:.16s"
         >
             <div class="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_top,_#e0f2fe,_transparent_60%)] pointer-events-none"></div>
 
@@ -165,22 +242,9 @@
 
         {{-- Kartu Kontak --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
-            {{-- Website --}}
-            <div class="group bg-white/95 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition overflow-hidden">
-                <div class="p-5 flex flex-col items-center text-center gap-2">
-                    <div class="w-11 h-11 rounded-2xl bg-sky-50 flex items-center justify-center group-hover:bg-sky-100 transition">
-                        <i data-lucide="globe" class="w-5 h-5 text-sky-600"></i>
-                    </div>
-                    <h4 class="text-sm font-semibold text-slate-900">Website</h4>
-                    <p class="text-[11px] text-slate-400">Kunjungi halaman utama ReuseForGood</p>
-                    <a href="#" class="mt-1 text-xs sm:text-sm font-medium text-sky-600 hover:text-sky-700 hover:underline">
-                        www.reuseforgood.com
-                    </a>
-                </div>
-            </div>
-
-            {{-- Email --}}
-            <div class="group bg-white/95 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition overflow-hidden">
+        {{-- Email --}}
+            <div class="card-animate group bg-white/95 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition overflow-hidden"
+                 style="animation-delay:.24s">
                 <div class="p-5 flex flex-col items-center text-center gap-2">
                     <div class="w-11 h-11 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition">
                         <i data-lucide="mail" class="w-5 h-5 text-emerald-600"></i>
@@ -191,24 +255,47 @@
                         hello@reuseforgood.com
                     </a>
                 </div>
-            </div>
+            </div>   
 
-            {{-- Telepon --}}
-            <div class="group bg-white/95 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition overflow-hidden">
+            {{-- Instagram --}}
+<div class="card-animate group bg-white/95 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition overflow-hidden"
+     style="animation-delay:.20s">
+    <div class="p-5 flex flex-col items-center text-center gap-2">
+        <div class="w-11 h-11 rounded-2xl bg-pink-50 flex items-center justify-center group-hover:bg-pink-100 transition">
+            <i data-lucide="instagram" class="w-5 h-5 text-pink-600"></i>
+        </div>
+        <h4 class="text-sm font-semibold text-slate-900">Instagram</h4>
+        <p class="text-[11px] text-slate-400">Ikuti aktivitas & update ReuseForGood</p>
+        <a href="https://www.instagram.com/aldo.sepvenco?igsh=MW5tenN3ZXd1OXp4YQ=="
+           target="_blank" rel="noopener"
+           class="mt-1 text-xs sm:text-sm font-medium text-sky-600 hover:text-sky-700 hover:underline">
+            @aldo.sepvenco
+        </a>
+    </div>
+</div>
+
+
+            {{-- WhatsApp (ganti Telepon) --}}
+            <div class="card-animate group bg-white/95 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition overflow-hidden"
+                 style="animation-delay:.28s">
                 <div class="p-5 flex flex-col items-center text-center gap-2">
-                    <div class="w-11 h-11 rounded-2xl bg-amber-50 flex items-center justify-center group-hover:bg-amber-100 transition">
-                        <i data-lucide="phone" class="w-5 h-5 text-amber-600"></i>
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition">
+                        <i data-lucide="phone" class="w-5 h-5 text-emerald-600"></i>
                     </div>
-                    <h4 class="text-sm font-semibold text-slate-900">Telepon</h4>
-                    <p class="text-[11px] text-slate-400">Hubungi kami pada jam kerja</p>
-                    <p class="mt-1 text-xs sm:text-sm text-slate-600">
-                        123-456-7890
-                    </p>
+                    <h4 class="text-sm font-semibold text-slate-900">WhatsApp</h4>
+                    <p class="text-[11px] text-slate-400">Chat cepat via WhatsApp</p>
+                    <a href="https://wa.me/62895408014090"
+                       target="_blank" rel="noopener"
+                       class="mt-1 text-xs sm:text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:underline inline-flex items-center gap-1">
+                        0895-4080-14090
+                        <i data-lucide="external-link" class="w-3 h-3"></i>
+                    </a>
                 </div>
             </div>
 
             {{-- Alamat --}}
-            <div class="group bg-white/95 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition overflow-hidden">
+            <div class="card-animate group bg-white/95 rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition overflow-hidden"
+                 style="animation-delay:.32s">
                 <div class="p-5 flex flex-col items-center text-center gap-2">
                     <div class="w-11 h-11 rounded-2xl bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition">
                         <i data-lucide="map-pin" class="w-5 h-5 text-purple-600"></i>

@@ -235,81 +235,89 @@
                                 </td>
 
                                 {{-- Aksi --}}
-                                <td class="px-4 py-3 align-top w-64">
-                                    <div class="flex flex-wrap gap-1.5 justify-end md:justify-start">
+<td class="px-4 py-3 align-top">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-1.5 min-w-[260px]">
 
-                                        {{-- Edit --}}
-                                        <a href="{{ route('admin.users.edit', $user->id) }}"
-                                           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold
-                                                  bg-amber-400 hover:bg-amber-500 text-white shadow-sm transition">
-                                            <i data-lucide="edit-2" class="w-3 h-3"></i>
-                                            Edit
-                                        </a>
+        {{-- Edit --}}
+        <a href="{{ route('admin.users.edit', $user->id) }}"
+           class="inline-flex w-full items-center justify-center gap-1.5
+                  px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap
+                  bg-amber-400 hover:bg-amber-500 text-white shadow-sm transition">
+            <i data-lucide="edit-2" class="w-3 h-3"></i>
+            Edit
+        </a>
 
-                                        {{-- Jangan tampilkan tombol status / hapus untuk diri sendiri --}}
-                                        @if(auth()->id() !== $user->id)
-                                            {{-- Suspend (hanya jika masih aktif) --}}
-                                            @if($status === UserModel::STATUS_AKTIF)
-                                                <form action="{{ route('admin.users.suspend', $user->id) }}" method="POST"
-                                                      onsubmit="return handleUserStatusAction(this, 'suspend');"
-                                                      class="inline-flex">
-                                                    @csrf
-                                                    <input type="hidden" name="reason">
-                                                    <button type="submit"
-                                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold
-                                                                   bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">
-                                                        <i data-lucide="pause-circle" class="w-3 h-3"></i>
-                                                        Suspend
-                                                    </button>
-                                                </form>
-                                            @endif
+        {{-- Jangan tampilkan tombol status / hapus untuk diri sendiri --}}
+        @if(auth()->id() !== $user->id)
 
-                                            {{-- Ban (kecuali sudah banned) --}}
-                                            @if($status !== UserModel::STATUS_BANNED)
-                                                <form action="{{ route('admin.users.ban', $user->id) }}" method="POST"
-                                                      onsubmit="return handleUserStatusAction(this, 'ban');"
-                                                      class="inline-flex">
-                                                    @csrf
-                                                    <input type="hidden" name="reason">
-                                                    <button type="submit"
-                                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold
-                                                                   bg-rose-500 hover:bg-rose-600 text-white shadow-sm transition">
-                                                        <i data-lucide="slash" class="w-3 h-3"></i>
-                                                        Ban
-                                                    </button>
-                                                </form>
-                                            @endif
+            {{-- Suspend (hanya jika masih aktif) --}}
+            @if($status === UserModel::STATUS_AKTIF)
+                <form action="{{ route('admin.users.suspend', $user->id) }}" method="POST"
+                      onsubmit="return handleUserStatusAction(this, 'suspend');"
+                      class="inline-flex w-full">
+                    @csrf
+                    <input type="hidden" name="reason">
+                    <button type="submit"
+                            class="inline-flex w-full items-center justify-center gap-1.5
+                                   px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap
+                                   bg-slate-200 text-slate-700 border border-slate-200 hover:bg-slate-300 transition">
+                        <i data-lucide="pause-circle" class="w-3 h-3"></i>
+                        Suspend
+                    </button>
+                </form>
+            @endif
 
-                                            {{-- Pulihkan (jika tidak aktif) --}}
-                                            @if($status !== UserModel::STATUS_AKTIF)
-                                                <form action="{{ route('admin.users.restore', $user->id) }}" method="POST"
-                                                      class="inline-flex">
-                                                    @csrf
-                                                    <button type="submit"
-                                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold
-                                                                   bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm transition">
-                                                        <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-                                                        Pulihkan
-                                                    </button>
-                                                </form>
-                                            @endif
+            {{-- Ban (kecuali sudah banned) --}}
+            @if($status !== UserModel::STATUS_BANNED)
+                <form action="{{ route('admin.users.ban', $user->id) }}" method="POST"
+                      onsubmit="return handleUserStatusAction(this, 'ban');"
+                      class="inline-flex w-full">
+                    @csrf
+                    <input type="hidden" name="reason">
+                    <button type="submit"
+                            class="inline-flex w-full items-center justify-center gap-1.5
+                                   px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap
+                                   bg-rose-500 hover:bg-rose-600 text-white shadow-sm transition">
+                        <i data-lucide="slash" class="w-3 h-3"></i>
+                        Ban
+                    </button>
+                </form>
+            @endif
 
-                                            {{-- Hapus --}}
-                                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST"
-                                                  class="inline-flex"
-                                                  onsubmit="return confirm('Yakin ingin menghapus pengguna ini?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold
-                                                               bg-slate-900 hover:bg-black text-white shadow-sm transition">
-                                                    <i data-lucide="trash-2" class="w-3 h-3"></i>
-                                                    Hapus
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </td>
+        {{-- Baris 2: Pulihkan + Hapus --}}
+        @if($status !== UserModel::STATUS_AKTIF)
+                <form action="{{ route('admin.users.restore', $user->id) }}" method="POST"
+                      class="inline-flex w-full">
+                    @csrf
+                    <button type="submit"
+                            class="inline-flex w-full items-center justify-center gap-1.5
+                                   px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap
+                                   bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm transition">
+                        <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                        Pulihkan
+                    </button>
+                </form>
+            @endif
+
+            {{-- Hapus --}}
+            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST"
+                  class="inline-flex w-full"
+                  onsubmit="return confirm('Yakin ingin menghapus pengguna ini?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                        class="inline-flex w-full items-center justify-center gap-1.5
+                               px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap
+                               bg-slate-900 hover:bg-black text-white shadow-sm transition">
+                    <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    Hapus
+                </button>
+            </form>
+
+        @endif
+    </div>
+</td>
+
                             </tr>
                         @empty
                             <tr>

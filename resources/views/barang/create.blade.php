@@ -7,10 +7,85 @@
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6">
 
+    {{-- ANIMASI KHUSUS HALAMAN DONASI --}}
+    <style>
+        @keyframes heroFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .hero-animate {
+            opacity: 0;
+            animation: heroFadeUp .65s ease-out forwards;
+        }
+
+        .hero-animate-delay-1 { animation-delay: .08s; }
+        .hero-animate-delay-2 { animation-delay: .16s; }
+
+        @keyframes heroOrbFloat {
+            0%, 100% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+            50% {
+                transform: translate3d(18px, -12px, 0) scale(1.06);
+            }
+        }
+
+        .hero-orb-1 {
+            animation: heroOrbFloat 22s ease-in-out infinite;
+        }
+
+        .hero-orb-2 {
+            animation: heroOrbFloat 28s ease-in-out infinite alternate;
+        }
+
+        @keyframes cardFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .card-animate {
+            opacity: 0;
+            animation: cardFadeUp .55s ease-out forwards;
+        }
+
+        @keyframes dropzonePulse {
+            0%, 100% {
+                transform: translateY(0);
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.02);
+            }
+            50% {
+                transform: translateY(-3px);
+                box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            }
+        }
+
+        .dropzone-animate:hover {
+            animation: dropzonePulse .9s ease-in-out;
+        }
+    </style>
+
     {{-- Header page (sekilas hero kecil) --}}
-    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white shadow-md mb-2">
+    <section class="hero-animate relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white shadow-md mb-2">
         {{-- efek radial halus --}}
         <div class="absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_top_left,_#ffffff,_transparent_55%)]"></div>
+
+        {{-- orb dekoratif --}}
+        <div class="pointer-events-none hero-orb-1 absolute -bottom-8 -right-10 w-40 h-40 rounded-full border border-white/30 opacity-40"></div>
+        <div class="pointer-events-none hero-orb-2 absolute -top-10 right-1/3 w-28 h-28 rounded-full border border-white/25 opacity-35"></div>
+
         <div class="relative px-5 sm:px-7 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <p class="text-[11px] tracking-[0.16em] font-semibold uppercase text-blue-100">
@@ -25,7 +100,7 @@
             </div>
 
             {{-- mini info step di kanan --}}
-            <div class="hidden sm:flex flex-col items-end gap-2">
+            <div class="hidden sm:flex flex-col items-end gap-2 hero-animate hero-animate-delay-1">
                 <div class="px-3 py-2 rounded-2xl bg-white/10 backdrop-blur shadow-sm text-right">
                     <p class="text-[11px] text-blue-50/90">Langkah pengisian</p>
                     <p class="text-xs font-semibold text-white">
@@ -38,7 +113,8 @@
 
     {{-- Alert error --}}
     @if ($errors->any())
-        <div class="flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <div class="card-animate flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+             style="animation-delay:.05s">
             <i data-lucide="alert-triangle" class="w-4 h-4 mt-0.5"></i>
             <div>
                 <p class="font-semibold text-[13px] mb-1">Oops! Ada beberapa hal yang perlu dicek:</p>
@@ -58,7 +134,8 @@
 
         {{-- FOTO BARANG --}}
         <section
-            class="bg-gradient-to-br from-blue-50 via-sky-50 to-emerald-50 rounded-3xl p-[1px] shadow-lg shadow-sky-100/60 border border-slate-100"
+            class="card-animate bg-gradient-to-br from-blue-50 via-sky-50 to-emerald-50 rounded-3xl p-[1px] shadow-lg shadow-sky-100/60 border border-slate-100"
+            style="animation-delay:.08s"
         >
             <div class="bg-white/90 backdrop-blur rounded-[1.45rem] p-5 sm:p-6 space-y-4">
 
@@ -79,12 +156,12 @@
                 <div class="rounded-3xl bg-gradient-to-br from-blue-100/40 via-sky-100/40 to-emerald-100/40 p-[1.5px] shadow-inner shadow-sky-100">
                     <div
                         id="preview-container"
-                        class="border border-dashed border-slate-300/70 rounded-[1.35rem] px-4 sm:px-6 py-6 grid grid-cols-2 md:grid-cols-3 gap-4
+                        class="dropzone-animate group border border-dashed border-slate-300/70 rounded-[1.35rem] px-4 sm:px-6 py-6 grid grid-cols-2 md:grid-cols-3 gap-4
                                text-center cursor-pointer bg-white/70 hover:bg-white transition max-h-80 overflow-y-auto"
                     >
                         <div id="placeholder" class="flex flex-col items-center justify-center col-span-full py-6">
                             <div class="w-14 h-14 rounded-[1.2rem] bg-slate-50 shadow-sm border border-slate-200 flex items-center justify-center mb-3">
-                                <i data-lucide="upload-cloud" class="w-7 h-7 text-slate-400"></i>
+                                <i data-lucide="upload-cloud" class="w-7 h-7 text-slate-400 group-hover:-translate-y-0.5 group-hover:scale-105 transition"></i>
                             </div>
                             <p class="font-semibold text-slate-900 text-sm sm:text-base">
                                 Klik untuk menambahkan foto
@@ -101,7 +178,8 @@
         </section>
 
         {{-- INFORMASI BARANG --}}
-        <section class="bg-white/95 rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
+        <section class="card-animate bg-white/95 rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4"
+                 style="animation-delay:.15s">
             <div class="flex items-center justify-between gap-2">
                 <h2 class="text-lg sm:text-xl font-semibold text-slate-900">Informasi Barang</h2>
                 <span class="text-[11px] text-slate-400">Semua kolom bertanda * wajib diisi</span>
@@ -168,7 +246,8 @@
         </section>
 
         {{-- LOKASI --}}
-        <section class="bg-white/95 rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
+        <section class="card-animate bg-white/95 rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4"
+                 style="animation-delay:.22s">
             <div class="flex items-center justify-between gap-2">
                 <h2 class="text-lg sm:text-xl font-semibold text-slate-900">Lokasi & Pengambilan</h2>
                 <span class="inline-flex items-center gap-1 text-[11px] text-slate-500">
@@ -211,7 +290,7 @@
         </section>
 
         {{-- BUTTON --}}
-        <div class="flex flex-col sm:flex-row items-center gap-3 pt-1">
+        <div class="card-animate flex flex-col sm:flex-row items-center gap-3 pt-1" style="animation-delay:.28s">
             <a href="{{ route('home') }}"
                class="w-full sm:w-1/3 inline-flex items-center justify-center px-4 py-2.5 rounded-2xl text-sm font-semibold
                       bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition">
@@ -221,8 +300,7 @@
             <button
                 type="submit"
                 class="w-full sm:flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold
-                       bg-blue-600 text-white shadow-md hover:bg-blue-700 hover:shadow-lg active:scale-[0.99] transition"
-            >
+                       bg-blue-600 text-white shadow-md hover:bg-blue-700 hover:shadow-lg active:scale-[0.99] transition">
                 <i data-lucide="send" class="w-4 h-4"></i>
                 Posting Donasi
             </button>
@@ -253,6 +331,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 kabupatenSelect.insertAdjacentHTML("beforeend", `<option value="${k}">${k}</option>`)
             );
         });
+
+        // kalau user sebelumnya sudah pilih provinsi + kabupaten (old value)
+        const oldProv = "{{ old('provinsi') }}";
+        const oldKab  = "{{ old('kabupaten') }}";
+        if (oldProv && kabupatenData[oldProv]) {
+            kabupatenData[oldProv].forEach(k => {
+                kabupatenSelect.insertAdjacentHTML(
+                    "beforeend",
+                    `<option value="${k}" ${k === oldKab ? 'selected' : ''}>${k}</option>`
+                );
+            });
+        }
     }
 
     // ====================== MULTI IMAGE PREVIEW + DELETE ======================
@@ -262,6 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const placeholderTemplate = previewContainer.innerHTML;
     let selectedFiles = [];
 
+    // klik di area dropzone -> buka file picker
     previewContainer.addEventListener("click", () => inputFoto.click());
 
     inputFoto.addEventListener("change", (e) => {
@@ -300,13 +391,13 @@ document.addEventListener("DOMContentLoaded", () => {
             reader.readAsDataURL(file);
         });
 
-        syncInput(); // <<============================ PENTING !!
+        syncInput();
     }
 
     function syncInput() {
         const dataTransfer = new DataTransfer();
         selectedFiles.forEach(file => dataTransfer.items.add(file));
-        inputFoto.files = dataTransfer.files;  // <<================== FIX NYA !!!
+        inputFoto.files = dataTransfer.files;
     }
 
     previewContainer.addEventListener("click", (e) => {

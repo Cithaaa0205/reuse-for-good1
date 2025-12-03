@@ -49,19 +49,78 @@ class AutoCategoryService
 
         // b) Mapping kata kunci → label kategori (nama kategori kira-kira mengandung kata ini)
         $keywordMap = [
-            'pakaian' => ['baju', 'kaos', 'kemeja', 'celana', 'rok', 'jaket', 'hoodie', 'dress', 'jilbab', 'kerudung'],
-            'sepatu'  => ['sepatu', 'sandal', 'sneakers', 'boots', 'slip on'],
-            'elektronik' => [
-                'hp', 'handphone', 'smartphone', 'laptop', 'notebook', 'komputer', 'pc',
-                'tv', 'televisi', 'speaker', 'headset', 'earphone', 'earbud', 'charger',
-                'kulkas', 'lemari es', 'mesin cuci', 'setrika', 'rice cooker', 'magic com',
-                'blender', 'kipas angin'
-            ],
-            'buku' => ['buku', 'novel', 'komik', 'majalah', 'kamus', 'pelajaran', 'modul', 'buku sekolah'],
-            'perabot' => ['meja', 'kursi', 'lemari', 'sofa', 'rak', 'kasur', 'dipan'],
-            'bayi' => ['bayi', 'stroller', 'popok', 'dot', 'botol susu', 'baju bayi'],
-            'alat tulis' => ['pulpen', 'pensil', 'buku tulis', 'penghapus', 'spidol', 'stabilo'],
-        ];
+    // 1. Pakaian
+    'pakaian' => [
+        'baju', 'kaos', 'kemeja', 'celana', 'rok', 'jaket', 'hoodie',
+        'dress', 'gamis', 'jilbab', 'kerudung', 'sweater', 'kain',
+        'seragam', 'almamater',
+    ],
+
+    // 2. Olahraga (termasuk sepatu olahraga)
+    'olahraga'  => [
+        'sepatu bola', 'sepatu futsal', 'sepatu lari', 'sepatu olahraga',
+        'sepatu sport', 'sneakers', 'running shoes', 'training shoes',
+        'bola', 'futsal', 'basket', 'badminton', 'raket', 'jersey',
+        'matras', 'skipping', 'barbel',
+    ],
+
+    // 3. Perabotan (termasuk perabot dapur & gelas)
+    'perabot' => [
+        'meja', 'kursi', 'lemari', 'sofa', 'rak', 'kasur', 'dipan',
+        'spring bed', 'bufet', 'lemari tv',
+        'gelas', 'cangkir', 'piring', 'mangkuk', 'sendok', 'garpu',
+        'teko', 'botol', 'wadah', 'tupperware',
+        'kompor', 'wajan', 'panci', 'rice cooker', 'magic com',
+    ],
+
+    // 4. Elektronik
+    'elektronik' => [
+        'hp', 'handphone', 'smartphone', 'android', 'iphone',
+        'laptop', 'notebook', 'komputer', 'pc',
+        'tv', 'televisi', 'speaker', 'headset', 'earphone', 'earbud', 'earbuds',
+        'charger', 'powerbank',
+        'kulkas', 'lemari es', 'mesin cuci', 'setrika',
+        'kipas', 'kipas angin', 'blender', 'microwave',
+        'monitor', 'printer',
+    ],
+
+    // 5. Bayi dan Anak
+    'bayi' => [
+        'bayi', 'stroller', 'kereta bayi', 'popok', 'diaper',
+        'dot', 'empeng', 'botol susu', 'perlak', 'selimut bayi',
+        'baju bayi', 'pampers',
+        'mainan bayi', 'playmat',
+    ],
+
+    // 6. Aksesoris
+    'aksesoris' => [
+        'tas', 'ransel', 'backpack', 'tas selempang', 'sling bag',
+        'dompet', 'pouch',
+        'sabuk', 'ikat pinggang',
+        'kalung', 'gelang', 'anting', 'cincin',
+        'jam tangan', 'kacamata', 'topi',
+    ],
+
+    // 7. Alat Musik
+    'alat musik' => [
+        'gitar', 'gitar listrik', 'gitar akustik', 'bass',
+        'pianika', 'piano', 'keyboard', 'organ',
+        'biola', 'cello', 'ukulele',
+        'drum', 'drum set', 'cajon',
+        'harmonika', 'seruling', 'flute', 'klarinet',
+    ],
+
+    // 8. Alat Tulis
+    'alat tulis' => [
+        'pulpen', 'pen', 'bolpoin',
+        'pensil', 'pensil warna', 'crayon',
+        'buku tulis', 'buku catatan', 'notebook',
+        'spidol', 'marker', 'stabilo', 'highlighter',
+        'penghapus', 'tip ex', 'tipp ex',
+        'penggaris', 'mistar',
+    ],
+];
+
 
         foreach ($keywordMap as $label => $keywords) {
             foreach ($keywords as $keyword) {

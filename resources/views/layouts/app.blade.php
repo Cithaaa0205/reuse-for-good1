@@ -282,7 +282,7 @@
     <footer class="border-t border-slate-200 bg-white/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] sm:text-xs text-slate-500">
             <p>&copy; {{ date('Y') }} Reuse For Good. Gerakan donasi barang bekas layak pakai.</p>
-            <p>Made with ❤️ untuk lingkungan & sesama.</p>
+            <p>RFG❤️ untuk lingkungan & sesama.</p>
         </div>
     </footer>
 

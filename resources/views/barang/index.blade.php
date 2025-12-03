@@ -5,36 +5,122 @@
 @section('content')
 <div class="max-w-6xl mx-auto space-y-8">
 
+    {{-- ANIMASI GLOBAL HALAMAN INI --}}
+    <style>
+        @keyframes heroFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .hero-animate {
+            opacity: 0;
+            animation: heroFadeUp .6s ease-out forwards;
+        }
+
+        .hero-animate-delay-1 { animation-delay: .08s; }
+        .hero-animate-delay-2 { animation-delay: .16s; }
+        .hero-animate-delay-3 { animation-delay: .24s; }
+        .hero-animate-delay-4 { animation-delay: .32s; }
+
+        @keyframes heroOrbFloat {
+            0%, 100% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+            50% {
+                transform: translate3d(18px, -12px, 0) scale(1.06);
+            }
+        }
+
+        .hero-orb-1 {
+            animation: heroOrbFloat 20s ease-in-out infinite;
+        }
+
+        .hero-orb-2 {
+            animation: heroOrbFloat 26s ease-in-out infinite alternate;
+        }
+
+        @keyframes cardFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .card-animate {
+            opacity: 0;
+            animation: cardFadeUp .55s ease-out forwards;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        @keyframes modalScale {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-show {
+            display: flex !important;
+            animation: modalFade .18s ease-out;
+        }
+
+        .modal-content-show {
+            animation: modalScale .22s ease-out;
+        }
+    </style>
+
     {{-- HERO / HEADER --}}
     <section
         class="relative overflow-hidden rounded-[28px] bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 text-white shadow-[0_22px_55px_rgba(15,23,42,0.35)]">
-        <div class="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top_left,_#ffffff,_transparent_55%)]"></div>
-        <div class="absolute -bottom-10 -right-10 w-48 h-48 rounded-full border border-white/30 opacity-40"></div>
+        {{-- glow & orb dekoratif --}}
+        <div class="pointer-events-none absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top_left,_#ffffff,_transparent_55%)]"></div>
+        <div class="pointer-events-none hero-orb-1 absolute -bottom-10 -right-10 w-48 h-48 rounded-full border border-white/30 opacity-40"></div>
+        <div class="pointer-events-none hero-orb-2 absolute -top-12 right-1/3 w-32 h-32 rounded-full border border-white/20 opacity-30"></div>
 
         <div class="relative px-6 sm:px-8 py-6 sm:py-7 lg:py-8 flex flex-col lg:flex-row lg:items-center gap-5">
             <div class="flex-1 space-y-2">
-                <p class="text-[11px] tracking-[0.16em] font-semibold uppercase text-blue-100">
-                    Etalase Barang
+                <p class="hero-animate text-[11px] tracking-[0.16em] font-semibold uppercase text-blue-100">
+                    Etalase Barang Donasi
                 </p>
-                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight">
+
+                <h1 class="hero-animate hero-animate-delay-1 text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight">
                     Temukan barang donasi terbaik di sekitarmu 🌱
                 </h1>
-                <p class="text-xs sm:text-sm text-blue-50/90 max-w-xl">
-                    Barang-barang layak pakai dari para donatur akan kami tampilkan dengan prioritas lokasi
-                    terdekat denganmu. Kamu bisa mengatur lokasi utama di pengaturan profil.
+
+                <p class="hero-animate hero-animate-delay-2 text-xs sm:text-sm text-blue-50/90 max-w-xl">
+                    Barang-barang layak pakai dari para donatur kami tampilkan dengan prioritas lokasi dan waktu
+                    posting. Atur lokasi utamamu di profil untuk rekomendasi yang lebih relevan dan dekat denganmu.
                 </p>
 
                 {{-- Info lokasi akun --}}
                 @if($userLocationLabel)
                     <div
-                        class="inline-flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full bg-white/15 text-[11px] sm:text-xs backdrop-blur border border-white/25">
+                        class="hero-animate hero-animate-delay-3 inline-flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full bg-white/15 text-[11px] sm:text-xs backdrop-blur border border-white/25">
                         <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
                         <span class="font-medium">Lokasi akun:</span>
                         <span class="font-semibold">{{ $userLocationLabel }}</span>
                     </div>
                 @else
                     <div
-                        class="inline-flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full bg-white/15 text-[11px] sm:text-xs backdrop-blur border border-white/25">
+                        class="hero-animate hero-animate-delay-3 inline-flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full bg-white/15 text-[11px] sm:text-xs backdrop-blur border border-white/25">
                         <i data-lucide="map-pin-off" class="w-3.5 h-3.5"></i>
                         <span class="font-medium">Lokasi akun belum diatur.</span>
                         <a href="{{ route('lokasi.create') }}"
@@ -45,7 +131,7 @@
                 @endif
             </div>
 
-            <div class="flex flex-col items-start lg:items-end gap-3">
+            <div class="hero-animate hero-animate-delay-4 flex flex-col items-start lg:items-end gap-3">
                 <a href="{{ route('barang.create') }}"
                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs sm:text-sm font-semibold
                           bg-white text-blue-700 shadow-md hover:shadow-lg hover:-translate-y-[1px] transition">
@@ -53,10 +139,10 @@
                     Donasikan Barang
                 </a>
 
-                {{-- TOMBOL FILTER --}}
+                {{-- TOMBOL FILTER LOKASI --}}
                 <button type="button" id="btn-open-location-filter"
                         class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-medium
-                               bg-blue-500/40 text-blue-50 border border-blue-100/60 hover:bg-blue-600/60 transition">
+                               bg-blue-500/40 text-blue-50 border border-blue-100/60 hover:bg-blue-600/60 hover:border-blue-200 transition">
                     <i data-lucide="locate-fixed" class="w-3.5 h-3.5"></i>
                     Filter Lokasi Barang Donasi
                 </button>
@@ -203,12 +289,14 @@
     <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
         @forelse($barang as $item)
             @php
-                $fotoLain = $item->foto_barang_lainnya ? json_decode($item->foto_barang_lainnya, true) : [];
-                $totalFoto = ($item->foto_barang_utama ? 1 : 0) + count($fotoLain);
+                $fotoLain   = $item->foto_barang_lainnya ? json_decode($item->foto_barang_lainnya, true) : [];
+                $totalFoto  = ($item->foto_barang_utama ? 1 : 0) + count($fotoLain);
+                $delay      = 0.03 * $loop->index;
             @endphp
 
             <a href="{{ route('barang.show', $item->id) }}"
-               class="group bg-white/95 rounded-3xl border border-slate-200 shadow-md hover:-translate-y-1 transition overflow-hidden flex flex-col">
+               class="card-animate group bg-white/95 rounded-3xl border border-slate-200 shadow-md hover:shadow-[0_24px_60px_rgba(15,23,42,0.16)] hover:-translate-y-1 transition overflow-hidden flex flex-col"
+               style="animation-delay: {{ $delay }}s">
 
                 {{-- FOTO --}}
                 <div class="relative">
@@ -221,7 +309,7 @@
 
                     <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
 
-                    <div class="absolute top-2 left-2">
+                    <div class="absolute top-2 left-2 flex flex-wrap gap-1.5">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-white/90 text-slate-700 border border-slate-200 shadow-sm">
                             {{ $item->kategori->nama_kategori ?? 'Tanpa Kategori' }}
                         </span>
@@ -295,11 +383,11 @@
 
 
 
-{{-- MODAL FILTER --}}
+{{-- MODAL FILTER LOKASI --}}
 <div id="location-filter-modal"
      class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-900/30 backdrop-blur-sm px-4">
     <div
-        class="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-5 sm:p-6 relative">
+        class="modal-inner max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-5 sm:p-6 relative">
         <button type="button" id="btn-close-location-filter"
                 class="absolute top-3 right-3 text-slate-400 hover:text-slate-600">
             <i data-lucide="x" class="w-4 h-4"></i>
@@ -373,133 +461,104 @@
 {{-- SCRIPT --}}
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    const inputFoto = document.getElementById("foto_barang");
-    const previewContainer = document.getElementById("preview-container");
-    const maxFiles = 5;
-    let selectedFiles = [];
+    // --- Modal open/close ---
+    const modal      = document.getElementById("location-filter-modal");
+    const modalInner = modal?.querySelector(".modal-inner");
+    const btnOpen    = document.getElementById("btn-open-location-filter");
+    const btnClose   = document.getElementById("btn-close-location-filter");
 
-    inputFoto.addEventListener("change", function () {
-        const newFiles = Array.from(this.files);
-
-        if (selectedFiles.length + newFiles.length > maxFiles) {
-            alert(`Maksimal upload ${maxFiles} foto!`);
-            return;
+    function openModal() {
+        if (!modal) return;
+        modal.classList.add("modal-show");
+        if (modalInner) {
+            modalInner.classList.add("modal-content-show");
         }
-
-        selectedFiles = [...selectedFiles, ...newFiles];
-        previewContainer.innerHTML = ""; // reset untuk render ulang semua preview
-
-        selectedFiles.forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const wrapper = document.createElement("div");
-                wrapper.className = "relative w-32 h-32";
-
-                wrapper.innerHTML = `
-                    <img src="${e.target.result}"
-                        class="w-32 h-32 object-cover rounded-xl border border-slate-300"/>
-                    <button type="button" data-index="${index}"
-                        class="absolute top-1 right-1 bg-red-600 text-white text-xs rounded-full px-1">
-                        ×
-                    </button>
-                `;
-
-                previewContainer.appendChild(wrapper);
-            };
-            reader.readAsDataURL(file);
-        });
-
-        // tombol hapus foto
-        previewContainer.addEventListener("click", (e) => {
-            if (e.target.tagName === "BUTTON") {
-                const i = e.target.getAttribute("data-index");
-                selectedFiles.splice(i, 1);
-
-                previewContainer.innerHTML = "";
-                selectedFiles.forEach((file, idx) => {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        const wrap = document.createElement("div");
-                        wrap.className = "relative w-32 h-32";
-                        wrap.innerHTML = `
-                            <img src="${ev.target.result}"
-                                 class="w-32 h-32 object-cover rounded-xl border border-slate-300">
-                            <button type="button" data-index="${idx}"
-                                    class="absolute top-1 right-1 bg-red-600 text-white text-xs rounded-full px-1">
-                                ×
-                            </button>
-                        `;
-                        previewContainer.appendChild(wrap);
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-        });
-    });
-});
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-
-    const inputFoto = document.getElementById("foto_barang");
-    const previewContainer = document.getElementById("preview-container");
-
-    let fileArray = []; // penyimpan permanen
-    const maxFiles = 5;
-
-    inputFoto.addEventListener("change", function () {
-        const newFiles = Array.from(this.files);
-
-        newFiles.forEach(file => {
-            if (fileArray.length < maxFiles) {
-                fileArray.push(file);
-            }
-        });
-
-        this.value = ""; // reset input supaya tidak replace internal file list
-
-        renderPreview();
-    });
-
-    function renderPreview() {
-        previewContainer.innerHTML = "";
-
-        fileArray.forEach((file, index) => {
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-                const div = document.createElement("div");
-                div.classList = "relative w-32 h-32";
-
-                div.innerHTML = `
-                    <img src="${e.target.result}" class="w-32 h-32 object-cover rounded-xl border border-gray-300">
-                    <button type="button" data-index="${index}"
-                        class="absolute top-1 right-1 bg-red-600 text-white text-xs rounded-full px-1">×</button>
-                `;
-
-                previewContainer.appendChild(div);
-            };
-
-            reader.readAsDataURL(file);
-        });
-
-        updateRealInput();
     }
 
-    function updateRealInput() {
-        const dt = new DataTransfer();
-        fileArray.forEach(file => dt.items.add(file));
-        inputFoto.files = dt.files; // hanya sekali assign
+    function closeModal() {
+        if (!modal) return;
+        modal.classList.remove("modal-show");
+        if (modalInner) {
+            modalInner.classList.remove("modal-content-show");
+        }
     }
 
-    previewContainer.addEventListener("click", (e) => {
-        if (e.target.tagName === "BUTTON") {
-            const i = e.target.dataset.index;
-            fileArray.splice(i, 1);
-            renderPreview();
-        }
+    if (btnOpen)  btnOpen.addEventListener("click", openModal);
+    if (btnClose) btnClose.addEventListener("click", closeModal);
+
+    if (modal) {
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) closeModal();
+        });
+    }
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeModal();
     });
+
+    // --- Dynamic kabupaten berdasarkan provinsi (contoh sederhana) ---
+    const provSelect = document.getElementById("filter_provinsi");
+    const kabSelect  = document.getElementById("filter_kabupaten");
+
+    if (provSelect && kabSelect) {
+        const kabOptionsData = {
+            "DI Yogyakarta": [
+                "Kota Yogyakarta",
+                "Sleman",
+                "Bantul",
+                "Gunungkidul",
+                "Kulon Progo",
+            ],
+            "Jawa Tengah": [
+                "Kota Semarang",
+                "Kab. Semarang",
+                "Surakarta",
+                "Magelang",
+                "Purwokerto",
+            ],
+            "Jawa Barat": [
+                "Kota Bandung",
+                "Kab. Bandung",
+                "Bogor",
+                "Depok",
+                "Bekasi",
+            ],
+            "Jawa Timur": [
+                "Kota Surabaya",
+                "Sidoarjo",
+                "Gresik",
+                "Malang",
+                "Kediri",
+            ],
+        };
+
+        function renderKabupatenOptions() {
+            const selectedProv  = provSelect.value;
+            const currentKabVal = "{{ request('filter_kabupaten') }}";
+
+            kabSelect.innerHTML = '<option value="">Semua kabupaten/kota</option>';
+
+            if (!selectedProv || !kabOptionsData[selectedProv]) return;
+
+            kabOptionsData[selectedProv].forEach((kab) => {
+                const opt    = document.createElement("option");
+                opt.value    = kab;
+                opt.textContent = kab;
+                if (kab === currentKabVal) opt.selected = true;
+                kabSelect.appendChild(opt);
+            });
+        }
+
+        provSelect.addEventListener("change", () => {
+            // saat user ganti provinsi di modal, kabupaten direset
+            "{{ request('filter_kabupaten') }}" // hanya supaya blade tetap happy
+            renderKabupatenOptions();
+        });
+
+        // render awal saat modal dibuka (untuk kasus provinsi sudah terpilih)
+        renderKabupatenOptions();
+    }
 });
 </script>
-
 
 @endsection
