@@ -58,9 +58,14 @@ Icons: Lucide Icons
 👥 Tim Kami
 
 Proyek ini dikembangkan dengan penuh dedikasi oleh tim mahasiswa Informatika yang peduli terhadap isu sosial dan lingkungan.
+Anggota Kelompok :
+1. Aldo Sepvenco – 235314128
+2. Citha Aurelya – 235314142
+3. Maria Angelina Purificacao – 235314143
+4. Kurnia Bintang Pratama – 235314147
+5. Maria Katarina Claudia Beo – 235314149
 
 Dibentuk pada: 19 Februari 2025
-
 Latar Belakang: Berawal dari tugas Rekayasa Perangkat Lunak dan dikembangkan lebih lanjut menjadi Proyek Informatika yang berdampak nyata.
 
 📞 Kontak
